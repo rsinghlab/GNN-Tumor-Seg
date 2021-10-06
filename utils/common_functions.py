@@ -1,20 +1,7 @@
 import numpy as np
 from scipy import ndimage
 
-def determine_tumor_crop(preds):
-    mask = preds!=0
-    #make it a bit bigger
-    mask = ndimage.binary_dilation(mask)
-    ix = np.ix_(mask.any(axis=(1,2)),mask.any(axis=(0,2)),mask.any(axis=(0,1)))
-    return ix
 
-#uncrops image back to full size (fills space around with healthy preds)
-def uncrop_to_brats_size(mri_id,dataset,voxel_preds):
-    brain_crop = dataset.brain_crops[mri_id]
-    full_img_shape = dataset.img_shapes[mri_id]
-    full_img = np.zeros(full_img_shape)
-    full_img[brain_crop]=voxel_preds
-    return full_img
 
 
 #Creates closest crop possible by discarding all planes that are entirely black

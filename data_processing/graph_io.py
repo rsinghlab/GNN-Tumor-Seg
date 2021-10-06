@@ -8,20 +8,11 @@ import json
 
 
 
-#Method to read in clustering and assign each voxel the label of its supervoxel
-def convert_supervoxel_labels_to_voxel(path_to_mri,sv_predictions=None,classify_background_as_healthy=True):
-    voxel_sv_assignments = load_segmentation_array(path_to_mri)
-    if sv_predictions is None:
-        #array of labels (presumably in order of sv number)
-        sv_predictions = read_supervoxel_predictions(path_to_mri)
-    #cluster_to_pred_map = {i:sv_predictions[i] for i in range(len(sv_predictions))}
-    cluster_to_pred_mapper = lambda cl: sv_predictions[cl] if cl!=-1 else -1
-    voxel_predictions = np.vectorize(cluster_to_pred_mapper,otypes=[np.float64])(voxel_sv_assignments)
-    if(classify_background_as_healthy):
-        voxel_predictions=np.where(voxel_predictions==-1,0,voxel_predictions)
-    return voxel_predictions
-
-
+#assign each voxel the label of its supervoxel
+def project_nodes_to_img(svs,node_labels):
+    #the background is -1 in the sv partitioning, so set this to be healthy
+    node_labels = np.append(node_labels,0)
+    return node_labels[svs]
 
 
 #after clustering into supervoxels, each one is assigned a label, this will return the labelling the brain is actually trained on
@@ -49,7 +40,7 @@ def save_networkx_graph(G,fp):
     str_dump = json.dumps(graph_as_json)
     with open(fp,'w') as f:
         f.write(str_dump)
-    print("Saved ",fp)
+    #print("Saved ",fp)
 
 def load_networkx_graph(fp):
     with open(fp,'r') as f:

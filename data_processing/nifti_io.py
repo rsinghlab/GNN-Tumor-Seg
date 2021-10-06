@@ -12,7 +12,8 @@ def read_in_patient_sample(scan_dir,modality_exts):
                 if filename.endswith(ext):
                     filepath = os.path.join(root, filename)
                     mod_img = nib.load(filepath)
-                    img_data = mod_img.get_fdata(dtype=np.float32)
+                    #data is actually stored as int16
+                    img_data = np.array(mod_img.dataobj,dtype=np.float32)
                     modality_imgs.append(img_data)
     #check that all the modalities were present in the folder
     assert(len(modality_imgs)==num_modalities)
@@ -41,7 +42,8 @@ def save_as_nifti(img,fp):
     nib.save(img, fp)
 
 def read_nifti(fp,data_type):
-    return nib.load(filepath).get_fdata(dtype=data_type)
+    nib_obj = nib.load(fp)
+    return np.array(nib_obj.dataobj,dtype=data_type)
 
 
 

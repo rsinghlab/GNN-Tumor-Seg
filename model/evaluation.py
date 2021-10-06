@@ -7,7 +7,7 @@ from scipy.ndimage import _ni_support
 from scipy.ndimage.morphology import distance_transform_edt, binary_erosion,\
     generate_binary_structure
 
-from .utils import graphio
+from data_processing import graph_io
 
 HEALTHY=0
 EDEMA=1
@@ -68,7 +68,6 @@ def calculate_brats_metrics(predicted_voxels,true_voxels):
     at_dice = calculate_dice_from_logical_array(at_preds,at_gt)
     at_hd = calculate_hd95_from_logical_array(at_preds,at_gt)
 
-    
     return [wt_dice,ct_dice,at_dice,wt_hd,ct_hd,at_hd]
 
 
@@ -76,13 +75,15 @@ def calculate_hd95_from_logical_array(pred,gt):
     try:
         hd = hd95(pred,gt)
     #no positive (1) voxels present in one of the inputs
-    except RuntimeError:
+    except RuntimeError as e:
         #then this label isnt present in either the prediction or gt, so assign a distance of zero since the pred was correct
         if(not 1 in pred and not 1 in gt):
-            return 0
+            hd = 0
         #return maximal distance
         else:
-            return 300
+            hd = 300
+    finally:
+        return hd
 
 def calculate_dice_from_logical_array(binary_predictions,binary_ground_truth):
     true_positives = np.logical_and(binary_predictions==1, binary_ground_truth==1)

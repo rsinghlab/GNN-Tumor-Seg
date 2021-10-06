@@ -3,12 +3,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
-from dgl import DGLGraph
 from dgl.nn.pytorch import GATConv, GraphConv
 from dgl.nn.pytorch.conv import SAGEConv
-
-
 
 
 class GraphSage(nn.Module):
@@ -63,18 +59,14 @@ class GAT(nn.Module):
 
 
 class CnnRefinementNet(nn.Module):
-    def __init__(self):
+    def __init__(self,in_feats,out_classes,layer_sizes):
         super().__init__()
         self.conv_layers=nn.ModuleList()
-        self.conv_layers.append(nn.Conv3d(in_channels=9,out_channels=16,kernel_size=5,stride=1,padding=2,padding_mode='replicate'))
-        self.conv_layers.append(nn.Conv3d(in_channels=16,out_channels=5,kernel_size=5,stride=1,padding=2,padding_mode='replicate'))
-        #self.batch_norm=nn.BatchNorm3d(5,track_running_stats=True)
+        self.conv_layers.append(nn.Conv3d(in_channels=in_feats,out_channels=layer_sizes[0],kernel_size=5,stride=1,padding=2,padding_mode='replicate'))
+        self.conv_layers.append(nn.Conv3d(in_channels=layer_sizes[0],out_channels=out_classes,kernel_size=5,stride=1,padding=2,padding_mode='replicate'))
     
-    def forward(self,img, gnn_out):
-        #gnn_out=self.batch_norm(gnn_out)
-        #concat
-        augmented_reproj = torch.cat([img,gnn_out],dim=1)
-        h = F.relu(self.conv_layers[0](augmented_reproj))
+    def forward(self,comb_img_logits):
+        h = F.relu(self.conv_layers[0](comb_img_logits))
         h = self.conv_layers[1](h)
         return h
 

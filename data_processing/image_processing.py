@@ -36,9 +36,9 @@ def determine_brain_crop(multi_modal_data):
 #put each modality in approx 0,1 range. not sure what the brats units are but they dont seem to have a cap
 def normalize_img(img_array,is_flat=False):
     if(is_flat):
-        maxes = np.quantile(img_array,0.995,axis=0)
+        maxes = np.quantile(img_array,0.995,axis=0).astype(np.float32)
     else:
-        maxes = np.quantile(img_array,0.995,axis=(0,1,2))
+        maxes = np.quantile(img_array,0.995,axis=(0,1,2)).astype(np.float32)
     #print("Max value for each modality", maxes)
     return img_array/maxes
 

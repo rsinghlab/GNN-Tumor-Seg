@@ -4,8 +4,8 @@ import os
 import concurrent.futures
 import argparse
 
-from utils import nifti_io, graph_io
-from utils.image_processing import *
+from data_processing import nifti_io, graph_io
+from data_processing.image_processing import *
 from mri2graph.graphgen import img2graph
 import Filepaths
 
@@ -27,7 +27,7 @@ class DataPreprocessor():
         self.boxiness_coef = args.boxiness
         #Data specs
         self.data_dir=args.data_dir if args.data_dir else Filepaths.INPUT_MRI_DIR
-        self.output_dir = args.output_dir if args.output_dir else f"{Filepaths.SAVED_GRAPH_DIR}_{args.num_nodes}_{args.boxiness}_{args.num_neighbors}"
+        self.output_dir = args.output_dir if args.output_dir else f"{Filepaths.PROCESSED_DATA_DIR}_{args.num_nodes}_{args.boxiness}_{args.num_neighbors}"
         self.mri_prefix = args.data_prefix
         self.modality_extensions=args.modality_extensions
         self.label_extension = args.label_extension
@@ -35,8 +35,8 @@ class DataPreprocessor():
 
         self.all_ids,self.id_to_fp = self.get_all_mris_in_dataset()
         data_stats=self.compute_dataset_stats() if STANDARDIZATION_STATS is None else STANDARDIZATION_STATS
-        self.dataset_mean = data_stats[0]
-        self.dataset_std = data_stats[1]
+        self.dataset_mean = np.array(data_stats[0],dtype=np.float32)
+        self.dataset_std = np.array(data_stats[1],dtype=np.float32)
 
     def get_all_mris_in_dataset(self):
         mri_folders = glob.glob(f"{self.data_dir}**/{self.mri_prefix}*/",recursive=True)
@@ -56,7 +56,7 @@ class DataPreprocessor():
             if u not in [0, 1, 2, 4]:
                 raise RuntimeError('unexpected label')
 
-        new_label_data = np.zeros_like(label_data)
+        new_label_data = np.zeros_like(label_data,dtype=np.int16)
         new_label_data[label_data == 4] = LABEL_MAP[4]
         new_label_data[label_data == 2] = LABEL_MAP[2]
         new_label_data[label_data == 1] = LABEL_MAP[1]
@@ -66,13 +66,13 @@ class DataPreprocessor():
         image_data = nifti_io.read_in_patient_sample(scan_full_path,self.modality_extensions)
         crop_idxs = determine_brain_crop(image_data)
         cropped_data = image_data[crop_idxs]
-        print(cropped_data.shape)
         if(self.label_extension):
             label_data = nifti_io.read_in_labels(scan_full_path,self.label_extension)
             cropped_labels = label_data[crop_idxs]
             standardized_labels=self.swap_labels(cropped_labels)
         else:
             standardized_labels=None
+
 
         normalized_data = normalize_img(cropped_data)
         standardized_data = standardize_img(normalized_data,self.dataset_mean,self.dataset_std)
@@ -114,9 +114,9 @@ class DataPreprocessor():
             print("making dir",save_path)
             os.makedirs(save_path)
         graph_io.save_networkx_graph(nx_graph, f"{save_path}{os.sep}{mri_id}_nxgraph.json")
-        nifti_io.save_image(image_data,f"{save_path}{os.sep}{mri_id}_input.nii.gz")
-        nifti_io.save_image(label_data,f"{save_path}{os.sep}{mri_id}_label.nii.gz")
-        nifti_io.save_image(region_img,f"{save_path}{os.sep}{mri_id}_supervoxels.nii.gz")
+        nifti_io.save_as_nifti(image_data,f"{save_path}{os.sep}{mri_id}_input.nii.gz")
+        nifti_io.save_as_nifti(label_data,f"{save_path}{os.sep}{mri_id}_label.nii.gz")
+        nifti_io.save_as_nifti(region_img,f"{save_path}{os.sep}{mri_id}_supervoxels.nii.gz")
         np.save(f"{save_path}{os.sep}{mri_id}_crop.npy",crop_idxs)
         return mri_id
 
