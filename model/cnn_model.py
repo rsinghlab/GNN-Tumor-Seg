@@ -20,7 +20,7 @@ class RefinementModel:
         self.optimizer=torch.optim.AdamW(self.net.parameters(),lr=hyperparameters.lr,weight_decay=hyperparameters.w_decay)
         self.lr_decay = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, hyperparameters.lr_decay, last_epoch=-1, verbose=False)
         self.loss_fcn = torch.nn.CrossEntropyLoss(weight=class_weights)
-        self.train_loader = DataLoader(train_dataset,batch_size=1,shuffle=True,num_workers=0,collate_fn=collate_refinement_net)
+        self.train_loader = DataLoader(train_dataset,batch_size=1,shuffle=True,num_workers=0,collate_fn=collate_refinement_net) if train_dataset is not None else None
         self.logit_dataset = logit_dataset
 
     def run_epoch(self):
@@ -31,7 +31,7 @@ class RefinementModel:
                 gnn_out,tumor_crop_idxs = self.logit_dataset.get_one(mri)
             except FileNotFoundError as e:
                 continue
-            cnn_in = self.combine_logits_and_image(torch.FloatTensor(gnn_out),img,tumor_crop_idxs)
+            cnn_in = self.combine_logits_and_image(torch.FloatTensor(gnn_out),img,tumor_crop_idxs).to(self.device)
 
             lab=lab[tumor_crop_idxs].unsqueeze(0).to(self.device)
             cnn_out = self.net(cnn_in)
@@ -45,7 +45,7 @@ class RefinementModel:
         self.lr_decay.step()
         return mean(losses)
 
-    def evaluate(self,dataset=None,save_preds_folder=None):
+    def evaluate(self,dataset=None):
         self.net.eval()
         metrics = zeros((len(dataset),7))
         i = 0
@@ -67,15 +67,13 @@ class RefinementModel:
         avg_metrics = mean(metrics,axis=0)
         return avg_metrics
 
-    #expects float tensors with channels last. Cant handle batch dimension atm.
-    def combine_logits_and_image(self,gnn_out,img,tumor_crop):
-        cnn_input = torch.cat([img,gnn_out],dim=-1)
-        cnn_input = cnn_input[tumor_crop]
-        return cnn_input.movedim(-1,0).unsqueeze(0).to(self.device)
-
-
 
     def save_weights(self,folder,name):
         torch.save(self.net.state_dict(),f"{folder}{name}.pt")
 
+#expects float tensors with channels last. Cant handle batch dimension atm.
+def combine_logits_and_image(gnn_out,img,tumor_crop):
+    cnn_input = torch.cat([img,gnn_out],dim=-1)
+    cnn_input = cnn_input[tumor_crop]
+    return cnn_input.movedim(-1,0).unsqueeze(0)
         

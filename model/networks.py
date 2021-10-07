@@ -56,7 +56,20 @@ class GAT(nn.Module):
         logits = self.layers[-1](g, h).mean(1)
         return logits
 
-
+def init_graph_net(model_type,hp):
+    dropout = hp.feature_dropout if 'feature_dropout' in hp._fields else 0
+    if(model_type=='GSpool'):
+        net = GraphSage(in_feats=hp.in_feats,layer_sizes=hp.layer_sizes,n_classes=hp.out_classes,aggregator_type='pool',dropout=dropout)
+    elif(model_type=='GSgcn'):
+        net = GraphSage(in_feats=hp.in_feats,layer_sizes=hp.layer_sizes,n_classes=hp.out_classes,aggregator_type='gcn',dropout=dropout)
+    elif(model_type=='GSmean'):
+        net = GraphSage(in_feats=hp.in_feats,layer_sizes=hp.layer_sizes,n_classes=hp.out_classes,aggregator_type='mean',dropout=dropout)
+    elif(model_type=='GAT'):
+        net = GAT(in_feats=hp.in_feats,layer_size=hp.layer_sizes,n_classes=hp.out_classes,
+                                heads=hp.gat_heads,residuals=hp.gat_residuals)
+    else:
+        raise Exception(f"Unknown model type: {model_type}")
+    return net
 
 class CnnRefinementNet(nn.Module):
     def __init__(self,in_feats,out_classes,layer_sizes):

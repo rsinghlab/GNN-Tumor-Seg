@@ -5,9 +5,10 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from data_processing.data_loader import ImageGraphDataset, minibatch_graphs
-from .networks import GraphSage,GAT
+from .networks import init_graph_net
 from . import evaluation
 from data_processing.graph_io import project_nodes_to_img
+
 
 BATCH_SIZE=6
 
@@ -15,26 +16,13 @@ class GNN:
     def __init__(self,model_type,hyperparameters,train_dataset):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         class_weights = torch.FloatTensor(hyperparameters.class_weights).to(self.device)
-        self.net=self.init_model(model_type,hyperparameters)      
+        self.net=init_gnn_net(model_type,hyperparameters)      
         self.net.to(self.device)
         self.optimizer=torch.optim.AdamW(self.net.parameters(),lr=hyperparameters.lr,weight_decay=hyperparameters.w_decay)
         self.lr_decay = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, hyperparameters.lr_decay, last_epoch=-1, verbose=False)
         self.loss_fcn = torch.nn.CrossEntropyLoss(weight=class_weights)
         self.train_loader = DataLoader(train_dataset,batch_size=BATCH_SIZE,shuffle=True,num_workers=0,collate_fn=minibatch_graphs) if train_dataset is not None else None
 
-    def init_model(self,model_type,hp):
-        if(model_type=='GSpool'):
-            net = GraphSage(in_feats=hp.in_feats,layer_sizes=hp.layer_sizes,n_classes=hp.out_classes,aggregator_type='pool',dropout=hp.feature_dropout)
-        elif(model_type=='GSgcn'):
-            net = GraphSage(in_feats=hp.in_feats,layer_sizes=hp.layer_sizes,n_classes=hp.out_classes,aggregator_type='gcn',dropout=hp.feature_dropout)
-        elif(model_type=='GSmean'):
-            net = GraphSage(in_feats=hp.in_feats,layer_sizes=hp.layer_sizes,n_classes=hp.out_classes,aggregator_type='mean',dropout=hp.feature_.dropout)
-        elif(model_type=='GAT'):
-            net = GAT(in_feats=hp.in_feats,layer_size=hp.layer_sizes,n_classes=hp.out_classes,
-                                    heads=hp.gat_heads,residuals=hp.gat_residuals)
-        else:
-            raise Exception(f"Unknown model type: {model_type}")
-        return net
 
     def run_epoch(self):
         self.net.train()
@@ -91,4 +79,3 @@ class GNN:
 
     def save_weights(self,folder,name):
         torch.save(self.net.state_dict(),f"{folder}{name}.pt")
-

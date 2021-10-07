@@ -31,7 +31,7 @@ class ImageGraphDataset(torch.utils.data.Dataset):
         elif(self.read_image  and not self.read_graph):
             return (mri_id, *self.get_image(mri_id))
         elif(self.read_image and self.read_graph):
-            return (mri_id, *self.get_image(mri_id),self.get_supervoxel_partitioning(mri_id), *self.get_graph(mri_id))
+            return (mri_id, *self.get_graph(mri_id), *self.get_image(mri_id))
         else:
             print("Invalid combination of flags")
 
@@ -63,7 +63,7 @@ class ImageGraphDataset(torch.utils.data.Dataset):
         if(self.read_label):
             return img,self.get_voxel_labels(mri_id)
         else:
-            return img
+            return (img,)
 
     def get_supervoxel_partitioning(self,mri_id):
         fp=f"{self.dataset_root_dir}{os.sep}{mri_id}{os.sep}{mri_id}_supervoxels.nii.gz"
