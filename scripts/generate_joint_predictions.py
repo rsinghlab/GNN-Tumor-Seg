@@ -6,6 +6,7 @@ import os
 from model.networks import CnnRefinementNet,init_graph_net
 from data_processing import graph_io,nifti_io, data_loader
 from data_processing.image_processing import determine_tumor_crop,uncrop_to_brats_size
+from .preprocess_dataset import swap_labels_to_brats
 import Filepaths
 from utils.hyperparam_helpers import EvalParamSet,DEFAULT_BACKGROUND_NODE_LOGITS
 from model.cnn_model import combine_logits_and_image
@@ -43,6 +44,7 @@ def save_predictions(graph_net,conv_net,dataset):
         with torch.no_grad():
             pred = predict_one_sample(graph_net,conv_net,graph,node_feats,img,supervoxel_partitioning)
         pred = uncrop_to_brats_size(raw_data_crop,pred)
+        pred = swap_labels_to_brats(pred)
         nifti_io.save_as_nifti(pred,f"{output_dir}{os.sep}{mri}.nii.gz")
 
 

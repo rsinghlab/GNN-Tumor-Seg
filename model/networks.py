@@ -30,7 +30,6 @@ class GAT(nn.Module):
     def __init__(self,in_feats,layer_sizes,n_classes,heads,residuals,
                 activation=F.elu,feat_drop=0,attn_drop=0,negative_slope=0.2):
         super().__init__()
-        self.num_layers = num_layers
         self.layers = nn.ModuleList()
         self.activation = activation
         # input projection (no residual)
@@ -50,7 +49,7 @@ class GAT(nn.Module):
 
     def forward(self,g, inputs):
         h = inputs
-        for l in range(self.num_layers-1):
+        for l in range(len(self.layers)-1):
             h = self.layers[l](g, h).flatten(1)
         # output projection
         logits = self.layers[-1](g, h).mean(1)
@@ -65,7 +64,7 @@ def init_graph_net(model_type,hp):
     elif(model_type=='GSmean'):
         net = GraphSage(in_feats=hp.in_feats,layer_sizes=hp.layer_sizes,n_classes=hp.out_classes,aggregator_type='mean',dropout=dropout)
     elif(model_type=='GAT'):
-        net = GAT(in_feats=hp.in_feats,layer_size=hp.layer_sizes,n_classes=hp.out_classes,
+        net = GAT(in_feats=hp.in_feats,layer_sizes=hp.layer_sizes,n_classes=hp.out_classes,
                                 heads=hp.gat_heads,residuals=hp.gat_residuals)
     else:
         raise Exception(f"Unknown model type: {model_type}")

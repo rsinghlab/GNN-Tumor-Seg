@@ -16,7 +16,7 @@ class GNN:
     def __init__(self,model_type,hyperparameters,train_dataset):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         class_weights = torch.FloatTensor(hyperparameters.class_weights).to(self.device)
-        self.net=init_gnn_net(model_type,hyperparameters)      
+        self.net=init_graph_net(model_type,hyperparameters)      
         self.net.to(self.device)
         self.optimizer=torch.optim.AdamW(self.net.parameters(),lr=hyperparameters.lr,weight_decay=hyperparameters.w_decay)
         self.lr_decay = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, hyperparameters.lr_decay, last_epoch=-1, verbose=False)
@@ -40,8 +40,9 @@ class GNN:
         self.lr_decay.step()
         return np.mean(losses)
 
+    #must be a subset of an ImageGraphDataset
     def evaluate(self,dataset:ImageGraphDataset):
-        assert(dataset.read_label==True)
+        assert(dataset.dataset.read_label==True)
         self.net.eval()
         #metrics stores loss,label counts, node dices,voxel dices,voxel hausdorff
         metrics = np.zeros((len(dataset),10))

@@ -65,11 +65,12 @@ if __name__ == '__main__':
     parser.add_argument('-m', '--model_type', default="GSpool",help='What graph learning layer to use. GSpool, GSmean, GSgcn, GAT',type=str)
     parser.add_argument('-k', '--num_folds', default=5, help='How many folds to run k fold validation on. 1== train on full dataset',type=int)
     parser.add_argument('-p', '--data_prefix', default="", help='A prefix that all data folders share, i.e. BraTS2021.',type=str)
+    parser.add_argument('-x', '--random_hyperparams', default=False,help='whether to generate random hyperparameters',action='store_true')
 
     args = parser.parse_args()
     dataset = ImageGraphDataset(args.data_dir,args.data_prefix,read_image=False,read_graph=True,read_label=True)
 
-    hyperparams = populate_hardcoded_hyperparameters(args.model_type)
+    hyperparams = generate_random_hyperparameters(args.model_type) if args.random_hyperparams else populate_hardcoded_hyperparameters(args.model_type)
     #output dir is where the model weights and progress file are stored, does not output any predictions
     progress_file_fd = f"{args.output_dir}{os.sep}{args.run_name}.txt"
     create_run_progress_file(progress_file_fd,args.model_type,hyperparams)

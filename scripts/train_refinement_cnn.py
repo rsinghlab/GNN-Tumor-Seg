@@ -58,12 +58,13 @@ if __name__ == '__main__':
     parser.add_argument('-r', '--run_name', required=True,help='A unique name to save results under',type=str)
     parser.add_argument('-k', '--num_folds', default=5, help='How many folds to run k fold validation on. 1== train on full dataset',type=int)
     parser.add_argument('-p', '--data_prefix', default="", help='A prefix that all data folders share, i.e. BraTS2021.',type=str)
+    parser.add_argument('-x', '--random_hyperparams', default=False,help='whether to generate random hyperparameters',action='store_true')
 
     args = parser.parse_args()
     image_dataset = ImageGraphDataset(args.data_dir,args.data_prefix,read_image=True,read_graph=False,read_label=True)
     logit_dataset = PredLogitDataset(args.saved_logit_dir)
 
-    hyperparams = populate_hardcoded_hyperparameters("CNN")
+    hyperparams = generate_random_hyperparameters("CNN") if args.random_hyperparams else populate_hardcoded_hyperparameters("CNN")
     #output dir is where the model weights and progress file are stored, does not output any predictions
     progress_file_fd = f"{args.output_dir}{os.sep}{args.run_name}.txt"
     create_run_progress_file(progress_file_fd,"CNN",hyperparams)

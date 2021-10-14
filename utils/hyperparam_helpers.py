@@ -28,7 +28,7 @@ def populate_hardcoded_hyperparameters(model_type):
         class_weights = [0.1,5,15,15]
         layer_sizes=[16]
     else:
-        n_epochs = 45
+        n_epochs = 15
         input_feats = DEFAULT_GNN_IN_FEATS
         class_weights = [0.1,1,2,2]
         layer_sizes=[64]*6
@@ -40,26 +40,27 @@ def populate_hardcoded_hyperparameters(model_type):
     return hyperparams
 
 #for use in hyperparameter search
-def generate_random_hyperparameters():
-    print("Generating Random Hyperparameters...")
+def generate_random_hyperparameters(model_type):
+    print("Generated Random Hyperparameters")
     R = random.RandomState(int(str(time())[-3:]))
     lr = R.choice([0.0001,0.0005,0.001])
-    lr_decay=0.98
     l2_reg = R.choice([0.0001,0])
-    class_weights=[0.1,R.normal(2,0.5),R.normal(1,0.2),R.normal(2,0.5)]
     feature_dropout = 0.0
+    if(model_type=="CNN"):
+        #n_epochs = R.choice([50,100,150])
+        n_epochs=6
+        input_feats=DEFAULT_CNN_IN_FEATS
+        class_weights = [0.1,R.normal(5,1),R.normal(10,2),R.normal(10,2)]
+        layer_sizes=[16]
+    else:
+        n_epochs = R.choice([300,400,500])
+        input_feats=DEFAULT_GNN_IN_FEATS
+        class_weights = [0.1,R.normal(1,0.2),R.normal(2,0.2),R.normal(2,0.2)]
+        layer_sizes=R.choice([3,4,5])*[int(R.choice([64,128,256]))]
 
-
-    n_epochs = R.choice([200,300,400,500])
-    input_feats=4
-    input_feats=20
-    cnn_layer_sizes=[16]
-    graph_layer_sizes=R.choice([3,4,5])*[int(R.choice([64,128,256]))]
-
-
-    
-    att_heads = R.randint(4,size=depth)+3
-    residuals = R.binomial(1,p=0.3,size=depth)
+    att_heads = R.randint(4,size=len(layer_sizes))+3
+    residuals = R.binomial(1,p=0.3,size=len(layer_sizes))
     residuals = [True if el==1 else False for el in residuals]
-    hyperparams = (n_epochs,input_feats,4, lr, lr_decay, l2_reg, class_weights, layer_sizes,feature_dropout, att_heads, residuals)
+
+    hyperparams = FullParamSet(n_epochs,input_feats,DEFAULT_N_CLASSES,lr,DEFAULT_LR_DECAY,l2_reg,class_weights,layer_sizes, feature_dropout, att_heads, residuals)
     return hyperparams

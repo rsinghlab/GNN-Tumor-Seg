@@ -50,18 +50,6 @@ class DataPreprocessor():
         removed_mris=[]
         return [fp for fp in mri_folders if fp.split("/")[-2] not in removed_mris]
 
-    def swap_labels(self,label_data):
-        uniques = np.unique(label_data)
-        for u in uniques:
-            if u not in [0, 1, 2, 4]:
-                raise RuntimeError('unexpected label')
-
-        new_label_data = np.zeros_like(label_data,dtype=np.int16)
-        new_label_data[label_data == 4] = LABEL_MAP[4]
-        new_label_data[label_data == 2] = LABEL_MAP[2]
-        new_label_data[label_data == 1] = LABEL_MAP[1]
-        return new_label_data
-
     def get_standardized_image(self, scan_full_path):
         image_data = nifti_io.read_in_patient_sample(scan_full_path,self.modality_extensions)
         crop_idxs = determine_brain_crop(image_data)
@@ -69,7 +57,7 @@ class DataPreprocessor():
         if(self.label_extension):
             label_data = nifti_io.read_in_labels(scan_full_path,self.label_extension)
             cropped_labels = label_data[crop_idxs]
-            standardized_labels=self.swap_labels(cropped_labels)
+            standardized_labels=swap_labels_from_brats(cropped_labels)
         else:
             standardized_labels=None
 
@@ -131,6 +119,32 @@ class DataPreprocessor():
                     print(f"Thread generated exception {exc}")
                 else:
                     print("Finished "+ mri_id)
+
+
+def swap_labels_from_brats(label_data):
+    uniques = np.unique(label_data)
+    for u in uniques:
+        if u not in [0, 1, 2, 4]:
+            raise RuntimeError('unexpected label')
+
+    new_label_data = np.zeros_like(label_data,dtype=np.int16)
+    new_label_data[label_data == 4] = LABEL_MAP[4]
+    new_label_data[label_data == 2] = LABEL_MAP[2]
+    new_label_data[label_data == 1] = LABEL_MAP[1]
+    return new_label_data
+
+
+def swap_labels_to_brats(label_data):
+    uniques = np.unique(label_data)
+    for u in uniques:
+        if u not in [0, 1, 2, 3]:
+            raise RuntimeError('unexpected label')
+
+    new_label_data = np.zeros_like(label_data,dtype=np.int16)
+    new_label_data[label_data == LABEL_MAP[4]] = 4
+    new_label_data[label_data == LABEL_MAP[2]] = 2
+    new_label_data[label_data == LABEL_MAP[1]] = 1
+    return new_label_data
 
 
 if __name__ == '__main__':

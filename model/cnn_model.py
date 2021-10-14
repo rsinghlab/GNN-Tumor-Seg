@@ -31,7 +31,7 @@ class RefinementModel:
                 gnn_out,tumor_crop_idxs = self.logit_dataset.get_one(mri)
             except FileNotFoundError as e:
                 continue
-            cnn_in = self.combine_logits_and_image(torch.FloatTensor(gnn_out),img,tumor_crop_idxs).to(self.device)
+            cnn_in = combine_logits_and_image(torch.FloatTensor(gnn_out),img,tumor_crop_idxs).to(self.device)
 
             lab=lab[tumor_crop_idxs].unsqueeze(0).to(self.device)
             cnn_out = self.net(cnn_in)
@@ -54,7 +54,7 @@ class RefinementModel:
                 gnn_out,tumor_crop_idxs = self.logit_dataset.get_one(mri)
             except FileNotFoundError as e:
                 continue
-            cnn_in = self.combine_logits_and_image(torch.FloatTensor(gnn_out),torch.FloatTensor(img),tumor_crop_idxs)
+            cnn_in = combine_logits_and_image(torch.FloatTensor(gnn_out),torch.FloatTensor(img),tumor_crop_idxs)
             lab=torch.LongTensor(lab)[tumor_crop_idxs].unsqueeze(0).to(self.device)
             with torch.no_grad():
                 cnn_out = self.net(cnn_in)

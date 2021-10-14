@@ -13,10 +13,10 @@ def create_run_progress_file(fp,model_type,hp):
 
         #GAT only
         if(model_type=="GAT"):
-            f.write(f"Heads\t{hp.att_heads}\n")
-            f.write(f"Residuals\t{hp.residuals}\n")
+            f.write(f"Heads\t{hp.gat_heads}\n")
+            f.write(f"Residuals\t{hp.gat_residuals}\n")
 
-        f.write("Epoch\tPartition\tLoss\tWT_Dice\tCT_Dice\tET_Dice\n\n")
+        f.write("Fold\tLoss\tWT_Dice\tCT_Dice\tET_Dice\n\n")
 
 
 def chunk_dataset_into_folds(dataset,k):
