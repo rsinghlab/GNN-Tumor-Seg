@@ -10,7 +10,13 @@ from utils.hyperparam_helpers import populate_hardcoded_hyperparameters, generat
 from data_processing.data_loader import ImageGraphDataset
 from model.gnn_model import GNN
 
-    
+import Filepaths
+
+'''
+Expects a path to a prepared data directory (created by preprocess script)
+Can specify either k fold validation or train on full dataset.
+Checkpoints model in the specified log folder.
+'''
 
 def train_on_full_dataset(args,hyperparams,progress_file_fd,dataset):
     print("Training on full dataset")
@@ -59,8 +65,8 @@ if __name__ == '__main__':
     # create the command line parser
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-d', '--data_dir', default=None, help='path to the directory where data is stored',type=str)
-    parser.add_argument('-o', '--output_dir', default=None,help='Directory to save graphs to',type=str)
+    parser.add_argument('-d', '--data_dir', default=Filepaths.PROCESSED_DATA_DIR, help='path to the directory where data is stored',type=str)
+    parser.add_argument('-o', '--output_dir', default=Filepaths.LOG_DIR,help='Log directory',type=str)
     parser.add_argument('-r', '--run_name', default=None,help='A unique name to save results under',type=str)
     parser.add_argument('-m', '--model_type', default="GSpool",help='What graph learning layer to use. GSpool, GSmean, GSgcn, GAT',type=str)
     parser.add_argument('-k', '--num_folds', default=5, help='How many folds to run k fold validation on. 1== train on full dataset',type=int)

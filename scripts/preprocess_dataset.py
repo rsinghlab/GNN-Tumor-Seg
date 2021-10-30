@@ -16,7 +16,26 @@ LABEL_MAP={4:3,2:1,1:2}
 STANDARDIZATION_STATS=([0.4645,0.6625,0.4064,0.3648],[0.1593,0.1703,0.1216,0.1627])
 N_THREADS = 3
 
+'''
+Preprocessing script to convert from data provided by BraTS to data used by our model. Should be the first thing you run.
+Fulfills the following four functions:
+1. Normalize and standardize each image of each MRI modality
+2. Combine multiple MRI modalitities into one image array
+3. Swap labels from BraTS order (0,2,1,4) to more intuitive order (0,1,2,3)
+4. Convert image into a graph
+    Using Simple Linear Iterative Clustering algorithm
+    Parameters passed on command line
 
+If no labels are present (e.g. at test time, in deployment) can also build graph without labels.
+
+Saves the following in the specified output directory for each sample
+MRI_ID/
+    _input.nii.gz (processed and combined modalities for a sample as nifti file)
+    _label.nii.gz
+    _nxgraph.json (networkx graph containing both graph topography and features and labels for each node)
+    _supervoxels.nii.gz (supervoxel partitioning produced by SLIC)
+    _crop.npy (optionally the crop of the processed data relative to the original data) (crops out empty image planes)
+'''
 
 class DataPreprocessor():
     def __init__(self,args):

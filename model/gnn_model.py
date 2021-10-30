@@ -12,6 +12,13 @@ from data_processing.graph_io import project_nodes_to_img
 
 BATCH_SIZE=6
 
+'''
+#Input#
+model_type is a string that determines the type of graph learning layers used (GraphSAGE, GAT)
+hyperparameters is a named tuple defined in utils/hyperparam helpers
+train_dataset is an ImageGraphDataset with read_graph set to True.
+'''
+
 class GNN:
     def __init__(self,model_type,hyperparameters,train_dataset):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -66,7 +73,7 @@ class GNN:
         total_counts = np.sum(counts,axis=0)
         return avg_metrics, total_counts
 
-    #TODO: add id to metric association
+    #Calculates a slew of different metrics that might be interesting such as the number of nodes of each label and voxel and node Dice scores
     def calculate_all_metrics_for_brain(self,mri_id,dataset,node_preds,node_labels):
         label_counts = np.concatenate([evaluation.count_node_labels(node_preds),evaluation.count_node_labels(node_labels)])
         node_dices = evaluation.calculate_node_dices(node_preds,node_labels)
