@@ -13,10 +13,10 @@ from data_processing.image_processing import determine_tumor_crop
 '''
 A Dataset similar to a torch dataset which iterates over all samples in a directory and returns the contents as numpy arrays.
 Expects to receive a filepath to the output of the preprocess script which should have the following:
-1.processed image (niftii)
-2.label image (niftii)
+1.processed image (nifti)
+2.label image (nifti)
 3.networkx graph (json)
-4.supervoxel partitioning (niftii)
+4.supervoxel partitioning (nifti)
 5. (optionally) a .npy file containing the crop of the processed image relative to the original image
 
 
@@ -60,6 +60,10 @@ class ImageGraphDataset(torch.utils.data.Dataset):
         else:
             print("Invalid combination of flags")
 
+    '''
+    Reads in the saved networkx graph, converts it to a DGLGraph, normalizes the graph (not actually sure how useful this is),
+    and returns the DGLGraph as well as a vector of node features and optionally labels.
+    '''
     def get_graph(self,mri_id):
         nx_graph = graph_io.load_networkx_graph(f"{self.dataset_root_dir}{os.sep}{mri_id}{os.sep}{mri_id}_nxgraph.json")
         features = np.array([nx_graph.nodes[n]['features'] for n in nx_graph.nodes])
@@ -110,9 +114,20 @@ class ImageGraphDataset(torch.utils.data.Dataset):
         return len(self.all_ids)
 
 
-#basically just takes a root dir and an id and returns the predicted logits when asked
-#not a torch dataset and not iterated over
-#also calculates and caches the crop around the tumorous region.
+
+'''
+Responsible for reading and returning saved output logits upon request.
+Upon instantiation, pass it a root directory where logits are saved.
+These logits should have been created by running the generate_gnn_predictions script
+with the save format specified as "logits".
+When training the Refinement CNN, pass it this dataset and it will automatically load the logits
+it requires to train. The first time it loads a set of logits it will also compute the closest crop
+around the area predicted to be tumorous by the logits. This crop is then stored in a dictionary so
+it does not have to be recomputed when the same logits are loaded during subsequent epochs.
+
+Note that this dataset is not designed to be iterated over and is currently only capable
+of reading in a file at a specified path.
+'''
 class PredLogitDataset():
     def __init__(self,root_dir):
         self.root_dir = root_dir
@@ -145,7 +160,7 @@ class PredLogitDataset():
 
 
 
-
+#Collation functions for torch dataloaders
 
 def minibatch_graphs(samples):
     mri_ids,graphs,features, labels = map(list, zip(*samples))

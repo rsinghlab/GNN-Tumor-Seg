@@ -9,6 +9,18 @@ from utils.hyperparam_helpers import populate_hardcoded_hyperparameters, generat
 from data_processing.data_loader import ImageGraphDataset, PredLogitDataset
 from model.cnn_model import RefinementModel
 
+
+'''
+Trains a CNN to refine the predictions made by a GNN
+Requires GNN prediction logits to have been generated and saved via generate_gnn_predictions
+prior to running this script.
+Can either run k fold validation or just train on the whole dataset. In the simple case where you use
+the hardcoded 2 layer CNN parameters there is no need to run k fold validation.
+
+Currently training the CNN is always preceded by training the GNN and generating its predictions as logits,
+which are fed into the CNN. Training both end to end is not implemented because it is very slow.
+'''
+
     
 
 def train_on_full_dataset(args,hyperparams,progress_file_fd,image_dataset,logit_dataset):

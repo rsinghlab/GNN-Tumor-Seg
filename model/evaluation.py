@@ -9,6 +9,12 @@ from scipy.ndimage.morphology import distance_transform_edt, binary_erosion,\
 
 from data_processing import graph_io
 
+'''
+A collection of functions to evaluate the model's predictions.
+Largely focused on the Sorenson Dice coefficient and 95th percentile of the Hausdorff distance,
+which are the metrics used by BraTS.
+'''
+
 HEALTHY=0
 EDEMA=1
 NET=2
@@ -21,7 +27,8 @@ def count_node_labels(preds_or_labels):
         counts[p]=c
     return counts
 
-#calculate node dice score for WT CT and ET for a single brain
+#calculate nodewise Dice score for WT CT and ET for a single brain.
+#Expects two 1D vectors of integers
 def calculate_node_dices(preds,labels):
     p,l=preds,labels
     wt_preds = np.where(p==HEALTHY,0,1)
@@ -38,7 +45,8 @@ def calculate_node_dices(preds,labels):
 
     return [wt_dice,ct_dice,at_dice]
 
-
+#Computes the percentage of voxels that are correctly predicted, optionally excluding tissue labelled as healthy in the ground truth
+#Useful for computing Achievable segmentation accuracy, for example.
 def compute_accuracy(supervoxel_labelling,ground_truth,include_healthy=True):
     assert(ground_truth.shape==supervoxel_labelling.shape)
     if(include_healthy):
@@ -51,7 +59,8 @@ def compute_accuracy(supervoxel_labelling,ground_truth,include_healthy=True):
     return num_correspondences/num_voxels
 
 
-#calculates voxel WT,CT,ET Dice and HD95
+#calculates voxelwise WT,CT,ET Dice and HD95 for a single brain.
+#Expects two n-D (only tested with 2D or 3D) arrays of integers
 def calculate_brats_metrics(predicted_voxels,true_voxels):
     wt_preds = np.where(predicted_voxels==HEALTHY,0,1)
     wt_gt = np.where(true_voxels==HEALTHY,0,1)
@@ -70,7 +79,7 @@ def calculate_brats_metrics(predicted_voxels,true_voxels):
 
     return [wt_dice,ct_dice,at_dice,wt_hd,ct_hd,at_hd]
 
-
+#wrapper around hd95 function that handles the case where one or more labels are missing from the ground truth or prediction.
 def calculate_hd95_from_logical_array(pred,gt):
     try:
         hd = hd95(pred,gt)
@@ -85,12 +94,13 @@ def calculate_hd95_from_logical_array(pred,gt):
     finally:
         return hd
 
+#Each tumor region (WT,CT,ET) is binarized for both the prediction and ground truth and then the overlapping volume is calculated.
 def calculate_dice_from_logical_array(binary_predictions,binary_ground_truth):
     true_positives = np.logical_and(binary_predictions==1, binary_ground_truth==1)
     false_positives = np.logical_and(binary_predictions==1, binary_ground_truth==0)
     false_negatives = np.logical_and(binary_predictions==0, binary_ground_truth==1)
     tp,fp,fn=np.count_nonzero(true_positives),np.count_nonzero(false_positives),np.count_nonzero(false_negatives)
-    #the case where no such labels exist (only really relevant for AT case)
+    #the case where no such labels exist (only really relevant for ET case)
     if(tp+fp+fn)==0:
         return 1
     return (2*tp)/(2*tp+fp+fn)
@@ -98,7 +108,6 @@ def calculate_dice_from_logical_array(binary_predictions,binary_ground_truth):
 
 
 #Copied from medpy package
-
 
 def hd95(result, reference, voxelspacing=None, connectivity=1):
     """

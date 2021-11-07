@@ -1,6 +1,10 @@
 import numpy as np
 from scipy import ndimage
 
+'''
+A small collection of helper functions for image processing
+'''
+
 def determine_tumor_crop(preds):
     mask = preds!=0
     #make it a bit bigger

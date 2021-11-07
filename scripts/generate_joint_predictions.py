@@ -16,6 +16,12 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 #takes filepaths to both GNN and CNN weight files and generates predictions by first predicting with GNN and then refining with CNN.
 
+'''
+Once both a GNN and CNN have been trained using the provided scripts, can generate predictions by chaining the two models.
+Provide the type of GNN and the paths to the weight files and ensure that the hyperparameters below match the expected shape
+of each model's layers and sizes.
+Then just specify the directory of images to be predicted on. These images should be preprocessed using the provided script.
+'''
 
 
 #Make sure hyperparams and weight file correspond

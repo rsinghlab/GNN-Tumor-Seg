@@ -9,7 +9,17 @@ from data_processing.data_loader import collate_refinement_net
 
 from numpy import zeros,mean
 
-
+'''
+The RefinementModel is a wrapper around a simple convolutional neural network. Its task is to train the CNN
+to take output logits from the graph neural network and refine them into better predictions.
+As input, it expects 1) the GNN output logits. These are provided by the logit_dataset.
+2) the input MRI image with all modalities used to train the GNN (for BraTS, 4).
+3) the labels
+It then concatenates the GNN output logits with the input image data and is trained to segment the brain.
+Note that the volume fed into the CNN is cropped to only the area around the GNN predicted tumor to speed up computation.
+It typically learns quite quickly and doesn't need many epochs since the GNN output logits already contain mostly correct predictions.
+For this reasons I also recommend training with a smaller (or quickly decaying) learning rate.
+'''
 
 class RefinementModel:
     def __init__(self,hyperparameters,train_dataset,logit_dataset):

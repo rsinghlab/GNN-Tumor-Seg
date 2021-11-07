@@ -1,5 +1,9 @@
 
-#function to save run hyperparameters and prepare file for writing
+'''
+A collection of helper functions used while training a model.
+'''
+
+#save hyperparameters to a log file at a specified path
 def create_run_progress_file(fp,model_type,hp):
     with open(fp, "w") as f:
         f.write(f"----Model Parameters----\n")
@@ -31,13 +35,13 @@ def update_progress_file(fp,description,loss,dices):
     with open(fp, "a") as f:
         f.write(f"{description}\t{loss}\t{dices[0]}\t{dices[1]}\t{dices[2]}\n")
 
-
+#Pass in a model (which already contains the training data) and run it for a specified number of epochs.
+#The model checkpoints its weights every couple of epochs.
 def train_on_fold(model,checkpoint_dir,n_epoch,run_name,fold):
     lowest_loss=1000
     for i in range(1,n_epoch+1):
         epoch_loss=model.run_epoch()
         if(i%5==0):
-            #TODO: tune convergence parameters
             print(f"____Epoch {i}_____")
             print(epoch_loss)
             if(i>n_epoch/2 and epoch_loss>lowest_loss+0.001):

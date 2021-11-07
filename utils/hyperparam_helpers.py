@@ -6,7 +6,7 @@ from time import time
 
 '''
 Hyperparameters are set here. Can either hardcode or generate random ones. Hyperparameters are stored as named tuples.
-training the GNN has different hyperparameters than training the CNN.
+Training the GNN has different hyperparameters than training the CNN.
 '''
 
 FullParamSet = namedtuple("FullParamSet",'n_epochs in_feats out_classes lr lr_decay w_decay class_weights layer_sizes feature_dropout gat_heads gat_residuals')

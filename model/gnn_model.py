@@ -47,7 +47,7 @@ class GNN:
         self.lr_decay.step()
         return np.mean(losses)
 
-    #must be a subset of an ImageGraphDataset
+    #must be a Subset of an ImageGraphDataset
     def evaluate(self,dataset:ImageGraphDataset):
         assert(dataset.dataset.read_label==True)
         self.net.eval()
@@ -78,7 +78,8 @@ class GNN:
         label_counts = np.concatenate([evaluation.count_node_labels(node_preds),evaluation.count_node_labels(node_labels)])
         node_dices = evaluation.calculate_node_dices(node_preds,node_labels)
         #read in voxel_labels and supervoxel mapping to compute the image metrics
-        #TODO: find a better way to do this than dataset.dataset
+        #TODO: dataset.dataset is currently required since the dataset is a torch Subset object created when chunking the 
+        #initial dataset into folds. There is likely a more elegant solution than this.
         sv_partitioning = dataset.dataset.get_supervoxel_partitioning(mri_id)
         true_voxels = dataset.dataset.get_voxel_labels(mri_id)
         pred_voxels = project_nodes_to_img(sv_partitioning,node_preds)

@@ -6,6 +6,16 @@ import torch.nn.functional as F
 from dgl.nn.pytorch import GATConv, GraphConv
 from dgl.nn.pytorch.conv import SAGEConv
 
+'''
+Contains the actual neural network architectures.
+Supports GraphSAGE with either the pool,mean,gcn, or lstm aggregator as well as GAT.
+The input, output, and intermediate layer sizes can all be specified.
+Typically will call init_graph_net and pass along the desired model and hyperparameters.
+
+Also contains the CNN Refinement net which is a very simple 2 layer 3D convolutional neural network.
+As input, it expects 8 channels, which are the concatenated 4 input modalities and 4 output logits of the GNN predictions.
+'''
+
 
 class GraphSage(nn.Module):
     def __init__(self,in_feats,layer_sizes,n_classes,aggregator_type,dropout):
