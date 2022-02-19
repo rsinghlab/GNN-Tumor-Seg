@@ -13,8 +13,9 @@ import Filepaths
 #combines preprocessing dataset, swapping labels and building graph
 
 LABEL_MAP={4:3,2:1,1:2}
+# (means,standard deviations). Used for the standardization. If None will be recomputed every time script is called.
 STANDARDIZATION_STATS=([0.4645,0.6625,0.4064,0.3648],[0.1593,0.1703,0.1216,0.1627])
-N_THREADS = 3
+N_THREADS = 6
 
 '''
 Preprocessing script to convert from data provided by BraTS to data used by our model. Should be the first thing you run.
@@ -61,6 +62,8 @@ class DataPreprocessor():
         mri_folders = glob.glob(f"{self.data_dir}**/{self.mri_prefix}*/",recursive=True)
         mri_folders = self.remove_incomplete_mris(mri_folders)
         scan_dic = {fp.split("/")[-2]:fp for fp in mri_folders}
+        if(len(mri_folders)==0):
+            print("Double check input path.")
         print(f"Found {len(mri_folders)} MRIs")
         return list(scan_dic.keys()),scan_dic
 
@@ -118,7 +121,7 @@ class DataPreprocessor():
         #save in correct folder
         save_path = f"{self.output_dir}{os.sep}{mri_id}"
         if not os.path.exists(save_path):
-            print("making dir",save_path)
+            #print("making dir",save_path)
             os.makedirs(save_path)
         graph_io.save_networkx_graph(nx_graph, f"{save_path}{os.sep}{mri_id}_nxgraph.json")
         nifti_io.save_as_nifti(image_data,f"{save_path}{os.sep}{mri_id}_input.nii.gz")
@@ -172,13 +175,14 @@ if __name__ == '__main__':
 
     parser.add_argument('-d', '--data_dir', default=None, help='path to the directory where data is stored',type=str)
     parser.add_argument('-n', '--num_nodes', default=15000, help='How many supervoxels to segment brain into',type=int)
-    parser.add_argument('-k', '--num_neighbors', default=10, help='How many neighbors each node has in the adjacency matrix',type=int)
+    parser.add_argument('-k', '--num_neighbors', default=10, help='How many neighbors each node has in the adjacency matrix. Passing 0 will create adjacency matrix based strictly on contiguous supervoxels',type=int)
     parser.add_argument('-b', '--boxiness', default=0.5, help='How square (regular) the supervoxels should be (recommended range=[0.1,1.0])',type=float)
     parser.add_argument('-o', '--output_dir', default=None,help='Directory to save graphs to',type=str)
     parser.add_argument('-m','--modality_extensions', nargs="+", default=["_flair.nii.gz","_t1.nii.gz","_t1ce.nii.gz","_t2.nii.gz"],help="The file extensions for each desired modality. Accepts a variable amount of modalities. Ensure consistent order.")
-    parser.add_argument('-l', '--label_extension', default=None, help='What the label extension is. At evaluation ignore')
+    parser.add_argument('-l', '--label_extension', default=None, help='What the label extension is. If not provided will ignore labels (i.e. do not provide when preprocessing evaluation data)')
     parser.add_argument('-p', '--data_prefix', default="", help='A prefix that all data folders share, i.e. BraTS2021.')
 
     args = parser.parse_args()
     gen = DataPreprocessor(args)
     gen.run()
+    print(f"Finished preprocessing data from {args.data_dir}.")
