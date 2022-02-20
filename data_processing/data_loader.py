@@ -3,7 +3,7 @@ import os
 import glob
 import networkx as nx
 import numpy as np
-from dgl import DGLGraph
+from dgl import from_networkx as to_dgl_graph
 from dgl import batch as dgl_batch
 
 from data_processing import nifti_io, graph_io
@@ -69,16 +69,16 @@ class ImageGraphDataset(torch.utils.data.Dataset):
         features = np.array([nx_graph.nodes[n]['features'] for n in nx_graph.nodes])
         if(self.read_label):
             labels = np.array([nx_graph.nodes[n]['label'] for n in nx_graph.nodes])
-        G = DGLGraph(nx_graph)
+        G = to_dgl_graph(nx_graph)
         n_edges = G.number_of_edges()
         # normalization
         degs = G.in_degrees().float()
         norm = torch.pow(degs, -0.5)
         norm[torch.isinf(norm)] = 0
         G.ndata['norm'] = norm.unsqueeze(1)
-        G.ndata['feat'] = features
+        #G.ndata['feat'] = features
         if(self.read_label):
-            G.ndata['label'] = labels
+            #G.ndata['label'] = labels
             return G, features, labels
         return G, features
 

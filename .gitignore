@@ -1,6 +1,7 @@
 **.DS_Store
 commands.txt
 temp*
+logs/*
 
 
 # Byte-compiled / optimized / DLL files

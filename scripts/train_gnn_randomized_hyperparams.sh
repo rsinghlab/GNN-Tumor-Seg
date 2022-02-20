@@ -3,7 +3,7 @@
 
 #first activate your venv
 export PATH="/anaconda3/bin:$PATH"
-source activate brain_tumor_segmentation
+source activate gnn_tumor_seg
 
 #set up your filepaths
 #both the training and testing data are expected to have been processed with the preprocess_dataset script.

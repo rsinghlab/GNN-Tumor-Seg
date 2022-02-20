@@ -1,7 +1,6 @@
 
 import numpy as np
 import torch
-import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from data_processing.data_loader import ImageGraphDataset, minibatch_graphs
@@ -22,6 +21,8 @@ train_dataset is an ImageGraphDataset with read_graph set to True.
 class GNN:
     def __init__(self,model_type,hyperparameters,train_dataset):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        print(torch.cuda.is_available())
+        print(torch._C._cuda_getCompiledVersion(), 'cuda compiled version')
         class_weights = torch.FloatTensor(hyperparameters.class_weights).to(self.device)
         self.net=init_graph_net(model_type,hyperparameters)      
         self.net.to(self.device)
