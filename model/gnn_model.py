@@ -21,8 +21,7 @@ train_dataset is an ImageGraphDataset with read_graph set to True.
 class GNN:
     def __init__(self,model_type,hyperparameters,train_dataset):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        print(torch.cuda.is_available())
-        print(torch._C._cuda_getCompiledVersion(), 'cuda compiled version')
+        print("Using device", self.device)
         class_weights = torch.FloatTensor(hyperparameters.class_weights).to(self.device)
         self.net=init_graph_net(model_type,hyperparameters)      
         self.net.to(self.device)
@@ -36,9 +35,11 @@ class GNN:
         self.net.train()
         losses=[]
         for batch_mris,batch_graphs,batch_features,batch_labels in self.train_loader:
-            batch_graphs.to(self.device)
+            batch_graphs = batch_graphs.to(self.device)
             batch_features = batch_features.to(self.device)
             batch_labels = batch_labels.to(self.device)
+            print(batch_features.device)
+            print(batch_graphs.device)
             logits = self.net(batch_graphs,batch_features)
             loss = self.loss_fcn(logits, batch_labels)
             losses.append(loss.item())
@@ -57,7 +58,7 @@ class GNN:
         counts = np.zeros((len(dataset),8))
         i=0
         for curr_id,curr_graph,curr_feats,curr_labels in dataset:
-            curr_graph.to(self.device)
+            curr_graph = curr_graph.to(self.device)
             curr_feats = torch.FloatTensor(curr_feats).to(self.device)
             curr_labels = torch.LongTensor(curr_labels).to(self.device)
             with torch.no_grad():
