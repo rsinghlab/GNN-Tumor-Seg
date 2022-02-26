@@ -23,7 +23,7 @@ Need to make sure that the type and shape of the weight file correspond to the m
 '''
 
 #Make sure model type and hyperparameters correspond to the weight file.
-def load_net_and_weights(model_type,weight_file):
+def load_net_and_weights(weight_file):
     model_type="GSpool"
     gnn_hp = EvalParamSet(in_feats=20,out_classes=4,layer_sizes=[64]*6,gat_heads=None,gat_residuals=None)
     net = init_graph_net(model_type,gnn_hp)
@@ -36,8 +36,9 @@ def load_net_and_weights(model_type,weight_file):
 #if preds is selected as output format, then they will additioanlly be expanded back to original BraTS size (240,240,155)
 def save_predictions(net,dataset,save_format='logits'):
     global device
+    net = net.to(device)
     for mri_id,graph,feats in dataset:
-        graph.to(device)
+        graph = graph.to(device)
         feats = torch.FloatTensor(feats).to(device)
         with torch.no_grad():
             logits = net(graph,feats)
@@ -84,6 +85,9 @@ if __name__ == '__main__':
         output_dir = args.output_dir
     else:
         output_dir = Filepaths.GNN_LOGIT_DIR if args.save_format=="logits" else Filepaths.PRED_DIR
+    if not os.path.isdir(output_dir):
+        print(f"Creating save directory: {output_dir}")
+        os.makedirs(output_dir)
     dataset = data_loader.ImageGraphDataset(args.data_dir,args.data_prefix,read_image=False,read_graph=True,read_label=False)
 
     #hyperparams = populate_hardcoded_hyperparameters(args.model_type)
