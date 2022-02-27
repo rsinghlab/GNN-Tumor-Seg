@@ -1,3 +1,4 @@
+from unicodedata import decimal
 import torch
 import numpy as np
 import argparse
@@ -31,7 +32,8 @@ def load_nets(gnn_type,gnn_weights,cnn_weights):
     cnn_hp = EvalParamSet(in_feats=8,out_classes=4,layer_sizes=[16],gat_heads=None,gat_residuals=None)
     graph_net = init_graph_net(gnn_type,gnn_hp)
     conv_net = CnnRefinementNet(cnn_hp.in_feats,cnn_hp.out_classes,cnn_hp.layer_sizes)
-
+    graph_net = graph_net.to(device)
+    conv_net = conv_net.to(device)
     graph_net.load_state_dict(torch.load(gnn_weights,map_location=device))
     conv_net.load_state_dict(torch.load(cnn_weights,map_location=device))
     graph_net.eval()
@@ -60,7 +62,7 @@ def predict_one_sample(graph_net,conv_net,graph,node_feats,img,supervoxel_partit
     node_feats = torch.FloatTensor(node_feats).to(device)
     img = torch.FloatTensor(img).to(device)
     node_logits = graph_net(graph,node_feats)
-    node_logits = torch.cat([node_logits,torch.FloatTensor(DEFAULT_BACKGROUND_NODE_LOGITS)],axis=0)
+    node_logits = torch.cat([node_logits,torch.FloatTensor(DEFAULT_BACKGROUND_NODE_LOGITS).to(device)],axis=0)
     voxel_logits = node_logits[supervoxel_partitioning]
     tumor_crop_idxs = determine_tumor_crop(voxel_logits.detach().cpu().numpy().argmax(axis=-1))
     cnn_in = combine_logits_and_image(voxel_logits,img,tumor_crop_idxs).to(device)
@@ -90,6 +92,9 @@ if __name__ == '__main__':
         output_dir = args.output_dir
     else:
         output_dir = Filepaths.GNN_LOGIT_DIR if args.save_format=="logits" else Filepaths.PRED_DIR
+    if not os.path.isdir(output_dir):
+        print(f"Creating save directory: {output_dir}")
+        os.makedirs(output_dir)
     dataset = data_loader.ImageGraphDataset(args.data_dir,args.data_prefix,read_image=True,read_graph=True,read_label=False)
 
     graph_net,conv_net = load_nets(args.gnn_type,args.gnn_weights,args.cnn_weights)
