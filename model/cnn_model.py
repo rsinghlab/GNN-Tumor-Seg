@@ -26,7 +26,7 @@ class RefinementModel:
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         class_weights = torch.FloatTensor(hyperparameters.class_weights).to(self.device)
         self.net=CnnRefinementNet(hyperparameters.in_feats,hyperparameters.out_classes,hyperparameters.layer_sizes)   
-        self.net.to(self.device)
+        self.net = self.net.to(self.device)
         self.optimizer=torch.optim.AdamW(self.net.parameters(),lr=hyperparameters.lr,weight_decay=hyperparameters.w_decay)
         self.lr_decay = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, hyperparameters.lr_decay, last_epoch=-1, verbose=False)
         self.loss_fcn = torch.nn.CrossEntropyLoss(weight=class_weights)
@@ -64,13 +64,13 @@ class RefinementModel:
                 gnn_out,tumor_crop_idxs = self.logit_dataset.get_one(mri)
             except FileNotFoundError as e:
                 continue
-            cnn_in = combine_logits_and_image(torch.FloatTensor(gnn_out),torch.FloatTensor(img),tumor_crop_idxs)
+            cnn_in = combine_logits_and_image(torch.FloatTensor(gnn_out),torch.FloatTensor(img),tumor_crop_idxs).to(self.device)
             lab=torch.LongTensor(lab)[tumor_crop_idxs].unsqueeze(0).to(self.device)
             with torch.no_grad():
                 cnn_out = self.net(cnn_in)
                 loss = self.loss_fcn(cnn_out, lab)
-            _, predicted_classes = torch.max(cnn_out, dim=1)
-            voxel_metrics = evaluation.calculate_brats_metrics(predicted_classes,lab.detach().cpu().numpy())
+            _, predicted_classes = torch.max(cnn_out.detach(), dim=1)
+            voxel_metrics = evaluation.calculate_brats_metrics(predicted_classes.cpu().numpy(),lab.detach().cpu().numpy())
             metrics[i][0]=loss.item()
             metrics[i][1:]=voxel_metrics
             i+=1
