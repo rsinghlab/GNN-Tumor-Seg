@@ -41,7 +41,8 @@ def train_on_fold(model,checkpoint_dir,n_epoch,run_name,fold):
     lowest_loss=1000
     for i in range(1,n_epoch+1):
         epoch_loss=model.run_epoch()
-        if(i%5==0):
+        #TODO: revert
+        if(i%1==0):
             print(f"____Epoch {i}_____")
             print(epoch_loss)
             if(i>n_epoch/2 and epoch_loss>lowest_loss+0.001):

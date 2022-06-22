@@ -1,6 +1,7 @@
 
 '''
-Can hardcode filepaths here rather than passing them as command line args to the different scripts.
+Can hardcode filepaths here for most scripts rather than passing them as command line args to the different scripts.
+Not required.
 '''
 
 GNN_LOGIT_DIR=""

@@ -92,10 +92,11 @@ if __name__ == '__main__':
         output_dir = args.output_dir
     else:
         output_dir = Filepaths.GNN_LOGIT_DIR if args.save_format=="logits" else Filepaths.PRED_DIR
+    output_dir = os.path.expanduser(output_dir)
     if not os.path.isdir(output_dir):
         print(f"Creating save directory: {output_dir}")
         os.makedirs(output_dir)
-    dataset = data_loader.ImageGraphDataset(args.data_dir,args.data_prefix,read_image=True,read_graph=True,read_label=False)
+    dataset = data_loader.ImageGraphDataset(os.path.expanduser(args.data_dir),args.data_prefix,read_image=True,read_graph=True,read_label=False)
 
     graph_net,conv_net = load_nets(args.gnn_type,args.gnn_weights,args.cnn_weights)
     save_predictions(graph_net,conv_net,dataset)

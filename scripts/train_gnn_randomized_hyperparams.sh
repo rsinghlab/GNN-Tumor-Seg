@@ -1,16 +1,16 @@
 #!/bin/bash
 
+#Example of how to run the train_gnn script with randomized hyperparameters.
+#both the training and testing data are expected to have been processed with the preprocess_dataset script.
 
-#first activate your venv
+#activate virtual environment
 export PATH="/anaconda3/bin:$PATH"
 source activate gnn_tumor_seg
 
 #set up your filepaths
 #both the training and testing data are expected to have been processed with the preprocess_dataset script.
-PROCESSED_TRAINING_DATA_DIR="/Users/camillo_stuff/singhlab/data/smallCIA/newppData"
-LOG_OUTPUT_DIR="/Users/camillo_stuff/singhlab/GNN-Tumor-Seg/temp_output"
-#I run this on a sun grid engine which i use to generate a unique name. Adapt according to use case
-#MODEL_NAME="randomModel${SGE_TASK_ID}"
+PROCESSED_TRAINING_DATA_DIR="~/project_data/BraTS21_data/processed/train"
+LOG_OUTPUT_DIR="~/code/GNN-Tumor-Seg/logs"
 MODEL_NAME="randomModelTest"
 NUM_FOLDS=3
 

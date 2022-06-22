@@ -46,8 +46,8 @@ class DataPreprocessor():
         self.num_neighbors = args.num_neighbors if args.num_neighbors!=0 else None
         self.boxiness_coef = args.boxiness
         #Data specs
-        self.data_dir=args.data_dir if args.data_dir else Filepaths.INPUT_MRI_DIR
-        self.output_dir = args.output_dir if args.output_dir else f"{Filepaths.PROCESSED_DATA_DIR}_{args.num_nodes}_{args.boxiness}_{args.num_neighbors}"
+        self.data_dir = os.path.expanduser(args.data_dir if args.data_dir else Filepaths.INPUT_MRI_DIR)
+        self.output_dir = os.path.expanduser(args.output_dir if args.output_dir else f"{Filepaths.PROCESSED_DATA_DIR}_{args.num_nodes}_{args.boxiness}_{args.num_neighbors}")
         self.mri_prefix = args.data_prefix
         self.modality_extensions=args.modality_extensions
         self.label_extension = args.label_extension

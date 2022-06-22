@@ -1,18 +1,16 @@
 #!/bin/bash
 
-#requires you to have saved logits from a GNN model
+#Example of how to run the train_cnn script with randomized hyperparameters.
+#Prior to running, make sure you have both preprocessed data and generated logits from a GNN model.
 
-#first activate your venv
+#activate virtual environment
 export PATH="/anaconda3/bin:$PATH"
 source activate brain_tumor_segmentation
 
-#set up your filepaths
-#both the training and testing data are expected to have been processed with the preprocess_dataset script.
-PROCESSED_TRAINING_DATA_DIR="/Users/camillo_stuff/singhlab/data/smallCIA/newppData"
-LOG_OUTPUT_DIR="/Users/camillo_stuff/singhlab/GNN-Tumor-Seg/temp_output"
-GNN_LOGIT_DIR="/Users/camillo_stuff/singhlab/GNN-Tumor-Seg/temp_logit"
-#I run this on a sun grid engine which i use to generate a unique name. Adapt according to use case
-#MODEL_NAME="randomModel${SGE_TASK_ID}"
+
+PROCESSED_TRAINING_DATA_DIR="~/project_data/BraTS21_data/processed/train"
+LOG_OUTPUT_DIR="~/code/GNN-Tumor-Seg/logs"
+GNN_LOGIT_DIR="~/project_data/BraTS21_data/logits/train"
 MODEL_NAME="randomModelTest"
 NUM_FOLDS=3
 

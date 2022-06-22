@@ -38,8 +38,6 @@ class GNN:
             batch_graphs = batch_graphs.to(self.device)
             batch_features = batch_features.to(self.device)
             batch_labels = batch_labels.to(self.device)
-            print(batch_features.device)
-            print(batch_graphs.device)
             logits = self.net(batch_graphs,batch_features)
             loss = self.loss_fcn(logits, batch_labels)
             losses.append(loss.item())

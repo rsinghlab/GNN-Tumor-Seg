@@ -74,10 +74,11 @@ if __name__ == '__main__':
     parser.add_argument('-x', '--random_hyperparams', default=False,help='whether to generate random hyperparameters',action='store_true')
 
     args = parser.parse_args()
-    dataset = ImageGraphDataset(args.data_dir,args.data_prefix,read_image=False,read_graph=True,read_label=True)
+    dataset = ImageGraphDataset(os.path.expanduser(args.data_dir),args.data_prefix,read_image=False,read_graph=True,read_label=True)
 
     hyperparams = generate_random_hyperparameters(args.model_type) if args.random_hyperparams else populate_hardcoded_hyperparameters(args.model_type)
     #output dir is where the model weights and progress file are stored, does not output any predictions
+    args.output_dir = os.path.expanduser(args.output_dir)
     progress_file_fd = f"{args.output_dir}{os.sep}{args.run_name}.txt"
     create_run_progress_file(progress_file_fd,args.model_type,hyperparams)
     if(args.num_folds==1):

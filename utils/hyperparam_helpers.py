@@ -28,12 +28,12 @@ DEFAULT_BACKGROUND_NODE_LOGITS = [[1.0,-1.0,-1.0,-1.0]]
 def populate_hardcoded_hyperparameters(model_type):
     print("Using hardcoded hyperparameters")
     if(model_type=="CNN"):
-        n_epochs = 6
+        n_epochs = 1
         input_feats=DEFAULT_CNN_IN_FEATS
         class_weights = [0.1,5,15,15]
         layer_sizes=[16]
     else:
-        n_epochs = 15
+        n_epochs = 10
         input_feats = DEFAULT_GNN_IN_FEATS
         class_weights = [0.1,1,2,2]
         layer_sizes=[64]*6
@@ -53,12 +53,13 @@ def generate_random_hyperparameters(model_type):
     feature_dropout = 0.0
     if(model_type=="CNN"):
         #n_epochs = R.choice([50,100,150])
-        n_epochs=6
+        n_epochs=3
         input_feats=DEFAULT_CNN_IN_FEATS
         class_weights = [0.1,R.normal(5,1),R.normal(10,2),R.normal(10,2)]
         layer_sizes=[16]
     else:
-        n_epochs = R.choice([300,400,500])
+        #n_epochs = R.choice([300,400,500])
+        n_epochs=3
         input_feats=DEFAULT_GNN_IN_FEATS
         class_weights = [0.1,R.normal(1,0.2),R.normal(2,0.2),R.normal(2,0.2)]
         layer_sizes=R.choice([3,4,5])*[int(R.choice([64,128,256]))]

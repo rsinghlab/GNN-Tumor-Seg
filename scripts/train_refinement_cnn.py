@@ -8,6 +8,7 @@ from utils.training_helpers import *
 from utils.hyperparam_helpers import populate_hardcoded_hyperparameters, generate_random_hyperparameters
 from data_processing.data_loader import ImageGraphDataset, PredLogitDataset
 from model.cnn_model import RefinementModel
+import Filepaths
 
 
 '''
@@ -73,11 +74,12 @@ if __name__ == '__main__':
     parser.add_argument('-x', '--random_hyperparams', default=False,help='whether to generate random hyperparameters',action='store_true')
 
     args = parser.parse_args()
-    image_dataset = ImageGraphDataset(args.data_dir,args.data_prefix,read_image=True,read_graph=False,read_label=True)
-    logit_dataset = PredLogitDataset(args.saved_logit_dir)
+    image_dataset = ImageGraphDataset(os.path.expanduser(args.data_dir),args.data_prefix,read_image=True,read_graph=False,read_label=True)
+    logit_dataset = PredLogitDataset(os.path.expanduser(args.saved_logit_dir))
 
     hyperparams = generate_random_hyperparameters("CNN") if args.random_hyperparams else populate_hardcoded_hyperparameters("CNN")
     #output dir is where the model weights and progress file are stored, does not output any predictions
+    args.output_dir = os.path.expanduser(args.output_dir)
     progress_file_fd = f"{args.output_dir}{os.sep}{args.run_name}.txt"
     create_run_progress_file(progress_file_fd,"CNN",hyperparams)
     if(args.num_folds==1):
