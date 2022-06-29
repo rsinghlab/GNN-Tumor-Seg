@@ -9,11 +9,11 @@ source activate gnn_tumor_seg
 
 #set up your filepaths
 #both the training and testing data are expected to have been processed with the preprocess_dataset script.
-PROCESSED_TRAINING_DATA_DIR="/Users/camillo_stuff/singhlab/data/smallCIA/newppData"
-PROCESSED_TEST_DATA_DIR="/Users/camillo_stuff/singhlab/data/smallCIA/newppData"
-GNN_LOGIT_DIR="/Users/camillo_stuff/singhlab/GNN-Tumor-Seg/temp_logit"
-PRED_OUTPUT_DIR="/Users/camillo_stuff/singhlab/GNN-Tumor-Seg/temp_pred"
-LOG_OUTPUT_DIR="/Users/camillo_stuff/singhlab/GNN-Tumor-Seg/temp_output"
+PROCESSED_TRAINING_DATA_DIR="~/project_data/BraTS21_data/processed/train"
+PROCESSED_TEST_DATA_DIR="~/project_data/BraTS21_data/processed/val"
+GNN_LOGIT_DIR="~/project_data/BraTS21_data/logits/train"
+PRED_OUTPUT_DIR="~/project_data/BraTS21_data/preds"
+LOG_OUTPUT_DIR="~/code/GNN-Tumor-Seg/logs"
 MODEL_NAME="bashModel"
 
 

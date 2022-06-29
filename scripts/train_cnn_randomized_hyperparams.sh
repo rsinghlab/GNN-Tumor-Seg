@@ -12,7 +12,7 @@ PROCESSED_TRAINING_DATA_DIR="~/project_data/BraTS21_data/processed/train"
 LOG_OUTPUT_DIR="~/code/GNN-Tumor-Seg/logs"
 GNN_LOGIT_DIR="~/project_data/BraTS21_data/logits/train"
 MODEL_NAME="randomModelTest"
-NUM_FOLDS=3
+NUM_FOLDS=2
 
 
 python -m scripts.train_refinement_cnn -d $PROCESSED_TRAINING_DATA_DIR  -o $LOG_OUTPUT_DIR -l $GNN_LOGIT_DIR -r "${MODEL_NAME}_cnn" -k $NUM_FOLDS

@@ -25,7 +25,7 @@ Need to make sure that the type and shape of the weight file correspond to the m
 #Make sure model type and hyperparameters correspond to the weight file.
 def load_net_and_weights(weight_file):
     model_type="GSpool"
-    gnn_hp = EvalParamSet(in_feats=20,out_classes=4,layer_sizes=[64]*6,gat_heads=None,gat_residuals=None)
+    gnn_hp = EvalParamSet(in_feats=20,out_classes=4,layer_sizes=[256]*4,gat_heads=None,gat_residuals=None)
     net = init_graph_net(model_type,gnn_hp)
 
     net.load_state_dict(torch.load(weight_file,map_location=device))
@@ -33,7 +33,8 @@ def load_net_and_weights(weight_file):
     return net
 
 
-#if preds is selected as output format, then they will additioanlly be expanded back to original BraTS size (240,240,155)
+# both save formats save as image.
+# if preds is selected as output format, then they will additionally be expanded back to original BraTS size (240,240,155)
 def save_predictions(net,dataset,save_format='logits'):
     global device
     net = net.to(device)

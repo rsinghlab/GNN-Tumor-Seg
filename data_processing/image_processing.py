@@ -9,6 +9,10 @@ def determine_tumor_crop(preds):
     mask = preds!=0
     #make it a bit bigger
     mask = ndimage.binary_dilation(mask)
+    #if no tumor is predicted by GNN (should happen extremely rarely with a trained GNN), then return whole uncropped image
+    if(np.all(~mask)):
+        print("No GNN predicted tumor, not cropping image")
+        mask = ~mask
     ix = np.ix_(mask.any(axis=(1,2)),mask.any(axis=(0,2)),mask.any(axis=(0,1)))
     return ix
 

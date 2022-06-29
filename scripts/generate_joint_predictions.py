@@ -28,7 +28,7 @@ Then just specify the directory of images to be predicted on. These images shoul
 #Make sure hyperparams and weight file correspond
 def load_nets(gnn_type,gnn_weights,cnn_weights):
     global device
-    gnn_hp = EvalParamSet(in_feats=20,out_classes=4,layer_sizes=[64]*6,gat_heads=None,gat_residuals=None)
+    gnn_hp = EvalParamSet(in_feats=20,out_classes=4,layer_sizes=[256]*4,gat_heads=None,gat_residuals=None)
     cnn_hp = EvalParamSet(in_feats=8,out_classes=4,layer_sizes=[16],gat_heads=None,gat_residuals=None)
     graph_net = init_graph_net(gnn_type,gnn_hp)
     conv_net = CnnRefinementNet(cnn_hp.in_feats,cnn_hp.out_classes,cnn_hp.layer_sizes)
