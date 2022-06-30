@@ -18,7 +18,7 @@ MODEL_NAME="bashModel"
 
 
 echo "Starting step 1 of 4: Training GNN"
-python -m scripts.train_gnn -d $PROCESSED_TRAINING_DATA_DIR -o $LOG_OUTPUT_DIR -r "${MODEL_NAME}_gnn" -k 1
+python -m scripts.train_gnn -d $PROCESSED_TRAINING_DATA_DIR -o $LOG_OUTPUT_DIR -r "${MODEL_NAME}_gnn" -m GSpool -k 1
 echo "Finished step 1"
 
 gnn_weight_file="${LOG_OUTPUT_DIR}/${MODEL_NAME}_gnn_f1.pt"
@@ -32,5 +32,5 @@ echo "Finished step 3"
 
 echo "Starting step 4 of 4: Generating Final Predictions"
 cnn_weight_file="${LOG_OUTPUT_DIR}/${MODEL_NAME}_cnn_f1.pt"
-python -m scripts.generate_joint_predictions -d $PROCESSED_TEST_DATA_DIR -o $PRED_OUTPUT_DIR -c $cnn_weight_file -g $gnn_weight_file
+python -m scripts.generate_joint_predictions -d $PROCESSED_TEST_DATA_DIR -o $PRED_OUTPUT_DIR -c $cnn_weight_file -g $gnn_weight_file -m GSpool
 echo "Finished Step 4. Predictions Generated"

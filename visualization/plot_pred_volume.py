@@ -1,4 +1,5 @@
 import argparse
+import os
 
 import Filepaths
 from .viz_helpers import get_data_for_plotting
@@ -19,7 +20,7 @@ args = parser.parse_args()
 flair_ext = "_flair.nii.gz"
 t1ce_ext="_t1ce.nii.gz"
 
-flair,t1ce,preds,gt = get_data_for_plotting(args.data_dir,args.seg_dir,args.mri_id,flair_ext,t1ce_ext,read_labels=args.plot_gt)
+flair,t1ce,preds,gt = get_data_for_plotting(os.path.expanduser(args.data_dir),os.path.expanduser(args.seg_dir),args.mri_id,flair_ext,t1ce_ext,read_labels=args.plot_gt)
 
 
 if(args.plot_gt):

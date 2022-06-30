@@ -36,7 +36,7 @@ def populate_hardcoded_hyperparameters(model_type):
         n_epochs = 10
         input_feats = DEFAULT_GNN_IN_FEATS
         class_weights = [0.1,1,2,2]
-        layer_sizes=[64]*6
+        layer_sizes=[256]*4
     #only relevant if model is GAT
     att_heads = [4,4,3,3,4,4]
     residuals=[False,False,True,False,False,True]

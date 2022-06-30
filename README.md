@@ -1,17 +1,9 @@
 # GNN-Tumor-Seg
-
-This repository contains the code used in 
-
-Please cite the following if...
+This repository contains the code accompanying "A Joint Graph and Image Convolution Network for Automatic Brain Tumor Segmentation" <insert link>, published in LNCS.
 
 This model was submitted to the BraTS2021 competition. We include the docker container submitted to the competition, which can be used to generate predictions on a target dataset provided it follows the format of the BraTS challenge.
 
-
-# Data Access
-The training and validation data for Task 1 of the BraTS2021 competition can be accessed through Synapse (https://www.synapse.org/#!Synapse:syn25829067/wiki/610865). More information on the BraTS competition can be found at http://www.braintumorsegmentation.org.
-
-
-# Requirements
+## Requirements
 Numpy>=1.17
 
 Scipy>=1.4
@@ -28,20 +20,11 @@ DGL>=0.4
 
 Requests
 
-# Provided Bash Scripts
 
-The train_gnn_randomized_hyperparameters and train_cnn_randomized_hyperparameters are provided as examples of how to train a GNN and CNN model with random hyperparameters. These are intended to be used for hyperparameter tuning.
-The scripts will train one model with random hyperparameters. The scripts must be run multiple times (e.g. in parallel) in order to train multiple models with different hyperparameters.
-Note that prior to running either script the data must first be preprocessed (see below) and a GNN must be trained prior to training a CNN.
+## How to use
+What follows is a general overview. Please see the block comments in the individual files for in depth explanations of individual functions.
 
-The run_pipeline script is intended to demonstrate the flow of training a complete model and generating final predictions once good hyperparameters have been identified. Unlike those above, it trains a model using set hyperparameters and on the complete dataset rather than chunking it into folds. Note that several steps receive their inputs from the output directories of previous steps. Each step is described in more detail below.
-
-For all of these bash scripts you will of course have to adjust the filepaths. Please also note that prior to running any of these scripts the data must first be preprocessed (see below) and a GNN must be trained prior to training a CNN.
-
-# How to use
-
-# Preprocessing
-
+### Preprocessing
 We first preprocess the data provided by the competition into the format used by our model. Specifically, the script preprocess.py accomplishes the following:
 
     1. Normalize and standardize each image of each MRI modality
@@ -58,8 +41,9 @@ Example: "python -m scripts.preprocess_dataset -d ~/project_data/BraTS21_data/ra
 
 The CLI arguments are explained in the script.
 
-# Training GNN
+We expect input data to be in the format provided by BraTS. For more information see data availability section below.
 
+### Training GNN
 Entrypoint: scripts.train_gnn.py
 Example: See scripts.train_gnn_randomized_hyperparameters.sh
 
@@ -68,16 +52,16 @@ The neural network itself is agnostic to the fact that input graphs represent MR
 
 Saves trained models and a text file with the results of each fold in the specified output directory.
 
-# Generating GNN Predictions
-
+### Generating GNN Predictions
 Entrypoint: scripts.generate_gnn_predictions.py
 Example: python -m scripts.generate_gnn_predictions -d ~/project_data/BraTS21_data/processed/train -o ~/project_data/BraTS21_data/logits/train -w ~/code/GNN-Tumor-Seg/logs/savedGNNModel.pt  -f logits
 
 Loads in a saved model and generates predictions on a target dataset. These predictions are always reprojected back to images, i.e. the output is NOT a graph. They can either take the form of GNN output logits (needed for training CNN) or of final predictions, where each value is the predicted class for that voxel. The latter form is also uncropped and reordered back to the original BraTS specifications so performance metrics can be directly calculated. 
 When loading in a model, ensure that the hyperparameters in load_net_and_weights match those of the saved model.
 
-# Training CNN to Refine GNN Predictions
+While the trained GNN can produce reliable predictions on its own, the identification of the tumor subclasses can be further improved by appending a CNN. The next two steps demonstrate training and predicting with a joint model.
 
+### Training CNN to Refine GNN Predictions
 Entrypoint: scripts.train_refinement_cnn.py
 Example: See scripts.train_cnn_randomized_hyperparameters.sh
 
@@ -86,22 +70,45 @@ See our paper for a complete explanation and accompanying figure.
 
 Saves trained models and a text file with the results of each fold in the specified output directory.
 
-# Generating Joint GNN-CNN Predictions
-
+### Generating Joint GNN-CNN Predictions
 Entrypoint: scripts.generate_joint_predictions.py
 Example: python -m scripts.generate_joint_predictions -d ~/project_data/BraTS21_data/processed/val -o ~/project_data/BraTS21_data/preds/val -c ~/code/GNN-Tumor-Seg/logs/savedCNNModel.pt -g ~/code/GNN-Tumor-Seg/logs/savedGNNModel.pt -m GSgcn
 
 Once both a GNN and CNN have been trained, joint predictions can be generated. Ensure the hyperparameters in load_nets match those of the saved models. The predictions will be saved to the specified output directory. They will conform to the BraTS shape and label order and so can be directly compared.
 
 
-# Visualizing Predictions
+### Visualizing Predictions
+There are two visualization scripts. Both allow the user to specify the directory of the raw data, the directory of the predictions, the id/name of the sample to visualize, as well as whether to plot the ground truth segmentation (if available). 
 
-python -m visualization.plot_pred_volume -d "~/project_data/BraTS21_data/raw/val" -s "~/project_data/BraTS21_data/preds/val" -i BraTS2021_01203 --plot_gt
+plot_pred_volume plots horizontal slices of the input modalities, the predicted segmentation, and (optionally) the ground truth segmentation. The height of the horizontal slices can be navigated by using the j and k keys while the focus is on the matplotlib window.
 
-# How to Modify Hyperparameters
+Example: python -m visualization.plot_pred_volume -d "~/project_data/BraTS21_data/raw/val" -s "~/project_data/BraTS21_data/preds/val" -i BraTS2021_01203 --plot_gt
+
+plot_pred_slices additionally takes as input a coronal, horizontal, and sagittal slice height. It will then display 3 columns of images, one for each plane. In order to look at different slices, the script must be rerun with different arguments.
+
+Example: python -m visualization.plot_pred_slices -d "~/project_data/BraTS21_data/raw/val" -s "~/project_data/BraTS21_data/preds/val" -i BraTS2021_01203 -cp 70 -sp 110 -hp 125
+
+### How to Modify Hyperparameters
 Hyperparameters are set in hyperparam_helpers.py. Hardcoded hyperparameters for a single run can be set by directly modifying the values in the populate_hyperparameter_method.
 The distributions for random hyperparameter generation can be modified in the generate_random_hyperparameter method.
 For the GNN model, the model architecture is searched for via random hyperparameter search. The CNN architecture is not searched for since the deisgn is to purposefully keep it simple.
 All possible hyperparamters are generated, even if the desired model doesn't use them.
 The hyperparameters must also be adjusted when loading in a saved model. This can be done in the load_net_and_weights function of generate_gnn_predictions.py and generate_joint_predictions.py
 This solution works, but is unfortunately not very programmatic.
+
+
+## Provided Bash Scripts
+The train_gnn_randomized_hyperparameters and train_cnn_randomized_hyperparameters are provided as examples of how to train a GNN and CNN model with random hyperparameters. These are intended to be used for hyperparameter tuning.
+The scripts will train one model with random hyperparameters. The scripts must be run multiple times (e.g. in parallel) in order to train multiple models with different hyperparameters.
+Note that prior to running either script the data must first be preprocessed (see below) and a GNN must be trained prior to training a CNN.
+
+The run_pipeline script is intended to demonstrate the flow of training a complete model and generating final predictions once good hyperparameters have been identified. Unlike those above, it trains a model using set hyperparameters and on the complete dataset rather than chunking it into folds. Note that several steps receive their inputs from the output directories of previous steps. Each step is described in more detail below.
+
+For all of these bash scripts you will of course have to adjust the filepaths. Please also note that prior to running any of these scripts the data must first be preprocessed (see below) and a GNN must be trained prior to training a CNN.
+
+## Data Access
+The BraTS data for Task 1 (Segmentation) is currently hosted on Synapse. To learn more about the BraTS challenge please visit https://www.synapse.org/#!Synapse:syn27046444/wiki/ and to access the training and validation data please visit https://www.synapse.org/#!Synapse:syn27046444/wiki/616992
+
+## Citation
+Please cite the following if you use the code from this repository: Coming soon!
+Also include BibTex

@@ -8,6 +8,7 @@ from model.gnn_model import GNN
 from data_processing import graph_io,nifti_io, data_loader
 import Filepaths
 from data_processing.image_processing import uncrop_to_brats_size
+from .preprocess_dataset import swap_labels_to_brats
 
 from utils.hyperparam_helpers import EvalParamSet,DEFAULT_BACKGROUND_NODE_LOGITS,populate_hardcoded_hyperparameters
 from model.networks import init_graph_net
@@ -68,6 +69,7 @@ def save_voxel_preds(mri_id,dataset,node_logits):
     raw_data_crop = dataset.get_crop(mri_id)
     predicted_voxels = graph_io.project_nodes_to_img(supervoxel_partitioning,predicted_nodes)
     predicted_voxels = uncrop_to_brats_size(raw_data_crop,predicted_voxels)
+    predicted_voxels = swap_labels_to_brats(predicted_voxels)
     nifti_io.save_as_nifti(predicted_voxels,f"{output_dir}{os.sep}{mri_id}.nii.gz")
 
 

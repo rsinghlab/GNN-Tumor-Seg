@@ -1,7 +1,7 @@
 
 '''
 Can hardcode filepaths here for most scripts rather than passing them as command line args to the different scripts.
-Not required.
+Deprecated, won't work for all scripts.
 '''
 
 GNN_LOGIT_DIR=""
