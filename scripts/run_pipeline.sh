@@ -12,13 +12,13 @@ source activate gnn_tumor_seg
 PROCESSED_TRAINING_DATA_DIR="~/project_data/BraTS21_data/processed/train"
 PROCESSED_TEST_DATA_DIR="~/project_data/BraTS21_data/processed/val"
 GNN_LOGIT_DIR="~/project_data/BraTS21_data/logits/train"
-PRED_OUTPUT_DIR="~/project_data/BraTS21_data/preds"
+PRED_OUTPUT_DIR="~/project_data/BraTS21_data/preds/val"
 LOG_OUTPUT_DIR="~/code/GNN-Tumor-Seg/logs"
 MODEL_NAME="bashModel"
 
 
 echo "Starting step 1 of 4: Training GNN"
-python -m scripts.train_gnn -d $PROCESSED_TRAINING_DATA_DIR -o $LOG_OUTPUT_DIR -r "${MODEL_NAME}_gnn" -m GSpool -k 1
+#python -m scripts.train_gnn -d $PROCESSED_TRAINING_DATA_DIR -o $LOG_OUTPUT_DIR -r "${MODEL_NAME}_gnn" -m GSpool -k 1
 echo "Finished step 1"
 
 gnn_weight_file="${LOG_OUTPUT_DIR}/${MODEL_NAME}_gnn_f1.pt"
