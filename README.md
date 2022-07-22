@@ -1,7 +1,6 @@
 # GNN-Tumor-Seg
-This repository contains the code accompanying "A Joint Graph and Image Convolution Network for Automatic Brain Tumor Segmentation" <insert link>, published in LNCS.
+This repository accompanies the publication ["A Joint Graph and Image Convolution Network for Automatic Brain Tumor Segmentation"](https://doi.org/10.1007/978-3-031-08999-2_30). It contains the source code for the experiments described in the paper as well as the Docker model submitted to the BraTS2021 competition.
 
-This model was submitted to the BraTS2021 competition. We include the docker container submitted to the competition, which can be used to generate predictions on target MRIs provided they follow the format of the BraTS challenge.
 
 ## Requirements
 Python >=3.7
@@ -78,6 +77,9 @@ Example: python -m scripts.generate_joint_predictions -d ~/project_data/BraTS21_
 
 Once both a GNN and CNN have been trained, joint predictions can be generated. Ensure the hyperparameters in load_nets match those of the saved models. The predictions will be saved to the specified output directory. They will conform to the BraTS shape and label order and so can be directly compared.
 
+#### Provided weights
+In case you want to skip training and directly generate predictions using a pretrained model, we include the weights of a fully trained GNN and CNN. (The Docker image can also be used for this purpose, see below) The GNN has 7 GraphSAGE pool layers with 256 neurons each followed by a ReLU nonlinearity. The CNN uses the default two layer architecture.
+
 
 ### Visualizing Predictions
 There are two visualization scripts. Both allow the user to specify the directory of the raw data, the directory of the predictions, the id/name of the sample to visualize, as well as whether to plot the ground truth segmentation (if available). 
@@ -111,6 +113,7 @@ For all of these bash scripts you will of course have to adjust the filepaths. P
 ## Using the Docker Image
 1. Load the image: docker load -i gnn_seg_brats21_docker.tar.gz
 2. Run the image: docker run -it --rm -v "<path to input folder>":"/input" -v "<path to output folder>":"/output" -e DGLBACKEND=pytorch gnn_seg:cpu_build
+The docker image contains the weights of a fully trained model and uses these to make the predictions.
 
 The BraTS challenge, and therefore the Docker image, require a particular input format. Notably, the image is NOT run on the entire dataset. Instead, it is run on each MRI individually. As such, the input directory should conform to the following:
 input/
@@ -130,11 +133,21 @@ Furthermore, during initial development, we assumed that all provided images wou
 [ -0.0,  -1.0,  -0.0, 239.0],
 [  0.0,   0.0,   1.0,   0.0],
 [  0.0,   0.0,   0.0,   1.0],
-MRIs with a different orientation will likely be segmented incorrectly.
+MRIs with a different orientation will likely fail or be segmented incorrectly.
 
 ## Data Access
 The BraTS data for Task 1 (Segmentation) is currently hosted on Synapse. To learn more about the BraTS challenge please visit https://www.synapse.org/#!Synapse:syn27046444/wiki/ and to access the training and validation data please visit https://www.synapse.org/#!Synapse:syn27046444/wiki/616992
 
 ## Citation
-Please cite the following if you use the code from this repository: Coming soon!
-Also include BibTex
+Please cite the following if you use the code or model from this repository:
+
+Saueressig, C., Berkley, A., Munbodh, R., Singh, R. (2022). A Joint Graph and Image Convolution Network for Automatic Brain Tumor Segmentation. In: Crimi, A., Bakas, S. (eds) Brainlesion: Glioma, Multiple Sclerosis, Stroke and Traumatic Brain Injuries. BrainLes 2021. Lecture Notes in Computer Science, vol 12962. Springer, Cham. https://doi.org/10.1007/978-3-031-08999-2_30
+
+@inproceedings{saueressig2022joint,
+  title={A Joint Graph and Image Convolution Network for Automatic Brain Tumor Segmentation},
+  author={Saueressig, Camillo and Berkley, Adam and Reshma, Munbodh and Singh, Ritambhara},
+  booktitle={Brainlesion: Glioma, Multiple Sclerosis, Stroke and Traumatic Brain Injuries},
+  pages={TODO},
+  year={2022},
+  organization={Springer}
+}
