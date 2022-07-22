@@ -28,17 +28,19 @@ What follows is a general overview. Please see the block comments in the individ
 ### Preprocessing
 We first preprocess the data provided by the competition into the format used by our model. Specifically, the script preprocess.py accomplishes the following:
 
-    1. Normalize and standardize each image of each MRI modality
+1. Normalize and standardize each image of each MRI modality
 
-    2. Combine multiple MRI modalitities into one image array
+2. Combine multiple MRI modalitities into one image array
 
-    3. Swap labels from BraTS order (0,2,1,4) to more intuitive order (0,1,2,3)
+3. Swap labels from BraTS order (0,2,1,4) to more intuitive order (0,1,2,3)
 
-    4. Convert image into a graph. This is done by running a supervoxel creation algorithm on the standardized and combined image and converting each supervoxel into a graph node, with edges between neighboring supervoxels.
+4. Convert image into a graph. This is done by running a supervoxel creation algorithm on the standardized and combined image and converting each supervoxel into a graph node, with edges between neighboring supervoxels.
 
 The converted data is then stored in a separate directory, which is used as input for subsequent scripts, e.g. training a model.
 
-Example: "python -m scripts.preprocess_dataset -d ~/project_data/BraTS21_data/raw/train -n 15000 -k 0 -b 0.5 -o ~/project_data/BraTS21_data/processed/train -l _seg.nii.gz -p BraTS2021"
+Example: 
+
+    "python -m scripts.preprocess_dataset -d ~/project_data/BraTS21_data/raw/train -n 15000 -k 0 -b 0.5 -o ~/project_data/BraTS21_data/processed/train -l _seg.nii.gz -p BraTS2021"
 
 The CLI arguments are explained in the script.
 
@@ -55,7 +57,9 @@ Saves trained models and a text file with the results of each fold in the specif
 
 ### Generating GNN Predictions
 Entrypoint: scripts.generate_gnn_predictions.py
-Example: python -m scripts.generate_gnn_predictions -d ~/project_data/BraTS21_data/processed/train -o ~/project_data/BraTS21_data/logits/train -w ~/code/GNN-Tumor-Seg/logs/savedGNNModel.pt  -f logits
+Example: 
+
+    python -m scripts.generate_gnn_predictions -d ~/project_data/BraTS21_data/processed/train -o ~/project_data/BraTS21_data/logits/train -w ~/code/GNN-Tumor-Seg/logs/savedGNNModel.pt  -f logits
 
 Loads in a saved model and generates predictions on a target dataset. These predictions are always reprojected back to images, i.e. the output is NOT a graph. They can either take the form of GNN output logits (needed for training CNN) or of final predictions, where each value is the predicted class for that voxel. The latter form is also uncropped and reordered back to the original BraTS specifications so performance metrics can be directly calculated. 
 When loading in a model, ensure that the hyperparameters in load_net_and_weights match those of the saved model.
@@ -73,7 +77,9 @@ Saves trained models and a text file with the results of each fold in the specif
 
 ### Generating Joint GNN-CNN Predictions
 Entrypoint: scripts.generate_joint_predictions.py
-Example: python -m scripts.generate_joint_predictions -d ~/project_data/BraTS21_data/processed/val -o ~/project_data/BraTS21_data/preds/val -c ~/code/GNN-Tumor-Seg/logs/savedCNNModel.pt -g ~/code/GNN-Tumor-Seg/logs/savedGNNModel.pt -m GSgcn
+Example: 
+
+    python -m scripts.generate_joint_predictions -d ~/project_data/BraTS21_data/processed/val -o ~/project_data/BraTS21_data/preds/val -c ~/code/GNN-Tumor-Seg/logs/savedCNNModel.pt -g ~/code/GNN-Tumor-Seg/logs/savedGNNModel.pt -m GSgcn
 
 Once both a GNN and CNN have been trained, joint predictions can be generated. Ensure the hyperparameters in load_nets match those of the saved models. The predictions will be saved to the specified output directory. They will conform to the BraTS shape and label order and so can be directly compared.
 
@@ -86,11 +92,15 @@ There are two visualization scripts. Both allow the user to specify the director
 
 plot_pred_volume plots horizontal slices of the input modalities, the predicted segmentation, and (optionally) the ground truth segmentation. The height of the horizontal slices can be navigated by using the j and k keys while the focus is on the matplotlib window.
 
-Example: python -m visualization.plot_pred_volume -d "~/project_data/BraTS21_data/raw/val" -s "~/project_data/BraTS21_data/preds/val" -i BraTS2021_01203 --plot_gt
+Example: 
+
+    python -m visualization.plot_pred_volume -d "~/project_data/BraTS21_data/raw/val" -s "~/project_data/BraTS21_data/preds/val" -i BraTS2021_01203 --plot_gt
 
 plot_pred_slices additionally takes as input a coronal, horizontal, and sagittal slice height. It will then display 3 columns of images, one for each plane. In order to look at different slices, the script must be rerun with different arguments.
 
-Example: python -m visualization.plot_pred_slices -d "~/project_data/BraTS21_data/raw/val" -s "~/project_data/BraTS21_data/preds/val" -i BraTS2021_01203 -cp 70 -sp 110 -hp 125
+Example: 
+
+    python -m visualization.plot_pred_slices -d "~/project_data/BraTS21_data/raw/val" -s "~/project_data/BraTS21_data/preds/val" -i BraTS2021_01203 -cp 70 -sp 110 -hp 125
 
 ### How to Modify Hyperparameters
 Hyperparameters are set in hyperparam_helpers.py. Hardcoded hyperparameters for a single run can be set by directly modifying the values in the populate_hyperparameter_method.
@@ -111,27 +121,37 @@ The run_pipeline script is intended to demonstrate the flow of training a comple
 For all of these bash scripts you will of course have to adjust the filepaths. Please also note that prior to running any of these scripts the data must first be preprocessed (see below) and a GNN must be trained prior to training a CNN.
 
 ## Using the Docker Image
-1. Load the image: docker load -i gnn_seg_brats21_docker.tar.gz
-2. Run the image: docker run -it --rm -v "<path to input folder>":"/input" -v "<path to output folder>":"/output" -e DGLBACKEND=pytorch gnn_seg:cpu_build
+1. Load the image: 
+    docker load -i gnn_seg_brats21_docker.tar.gz
+2. Run the image: 
+    docker run -it --rm -v "\<path to input folder\>":"/input" -v "\<path to output folder\>":"/output" -e DGLBACKEND=pytorch gnn_seg:cpu_build
 The docker image contains the weights of a fully trained model and uses these to make the predictions.
 
 The BraTS challenge, and therefore the Docker image, require a particular input format. Notably, the image is NOT run on the entire dataset. Instead, it is run on each MRI individually. As such, the input directory should conform to the following:
 input/
-    BraTS2021_xxxxx_flair.nii.gz
-    BraTS2021_xxxxx_t1.nii.gz
-    BraTS2021_xxxxx_t1ce.nii.gz
-    BraTS2021_xxxxx_t2.nii.gz
+
+   BraTS2021_xxxxx_flair.nii.gz
+
+   BraTS2021_xxxxx_t1.nii.gz
+
+   BraTS2021_xxxxx_t1ce.nii.gz
+
+   BraTS2021_xxxxx_t2.nii.gz
 
 The output will then be produced as:
 output/
-    xxxxx.nii.gz
+
+   xxxxx.nii.gz
 
 In order to segment multiple MRIs sequentially, we recommend either 1) using the generate_joint_predictions.py script or 2) writing a script to run the "docker run" command as many times as needed while changing the input folder argument.
 
 Furthermore, during initial development, we assumed that all provided images would have the same orientation as the BraTS training data:
 [ -1.0,  -0.0,  -0.0,  -0.0],
+
 [ -0.0,  -1.0,  -0.0, 239.0],
+
 [  0.0,   0.0,   1.0,   0.0],
+
 [  0.0,   0.0,   0.0,   1.0],
 MRIs with a different orientation will likely fail or be segmented incorrectly.
 
