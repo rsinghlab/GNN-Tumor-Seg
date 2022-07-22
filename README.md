@@ -1,9 +1,11 @@
 # GNN-Tumor-Seg
 This repository contains the code accompanying "A Joint Graph and Image Convolution Network for Automatic Brain Tumor Segmentation" <insert link>, published in LNCS.
 
-This model was submitted to the BraTS2021 competition. We include the docker container submitted to the competition, which can be used to generate predictions on a target dataset provided it follows the format of the BraTS challenge.
+This model was submitted to the BraTS2021 competition. We include the docker container submitted to the competition, which can be used to generate predictions on target MRIs provided they follow the format of the BraTS challenge.
 
 ## Requirements
+Python >=3.7
+
 Numpy>=1.17
 
 Scipy>=1.4
@@ -105,6 +107,30 @@ Note that prior to running either script the data must first be preprocessed (se
 The run_pipeline script is intended to demonstrate the flow of training a complete model and generating final predictions once good hyperparameters have been identified. Unlike those above, it trains a model using set hyperparameters and on the complete dataset rather than chunking it into folds. Note that several steps receive their inputs from the output directories of previous steps. Each step is described in more detail below.
 
 For all of these bash scripts you will of course have to adjust the filepaths. Please also note that prior to running any of these scripts the data must first be preprocessed (see below) and a GNN must be trained prior to training a CNN.
+
+## Using the Docker Image
+1. Load the image: docker load -i gnn_seg_brats21_docker.tar.gz
+2. Run the image: docker run -it --rm -v "<path to input folder>":"/input" -v "<path to output folder>":"/output" -e DGLBACKEND=pytorch gnn_seg:cpu_build
+
+The BraTS challenge, and therefore the Docker image, require a particular input format. Notably, the image is NOT run on the entire dataset. Instead, it is run on each MRI individually. As such, the input directory should conform to the following:
+input/
+    BraTS2021_xxxxx_flair.nii.gz
+    BraTS2021_xxxxx_t1.nii.gz
+    BraTS2021_xxxxx_t1ce.nii.gz
+    BraTS2021_xxxxx_t2.nii.gz
+
+The output will then be produced as:
+output/
+    xxxxx.nii.gz
+
+In order to segment multiple MRIs sequentially, we recommend either 1) using the generate_joint_predictions.py script or 2) writing a script to run the "docker run" command as many times as needed while changing the input folder argument.
+
+Furthermore, during initial development, we assumed that all provided images would have the same orientation as the BraTS training data:
+[ -1.0,  -0.0,  -0.0,  -0.0],
+[ -0.0,  -1.0,  -0.0, 239.0],
+[  0.0,   0.0,   1.0,   0.0],
+[  0.0,   0.0,   0.0,   1.0],
+MRIs with a different orientation will likely be segmented incorrectly.
 
 ## Data Access
 The BraTS data for Task 1 (Segmentation) is currently hosted on Synapse. To learn more about the BraTS challenge please visit https://www.synapse.org/#!Synapse:syn27046444/wiki/ and to access the training and validation data please visit https://www.synapse.org/#!Synapse:syn27046444/wiki/616992
