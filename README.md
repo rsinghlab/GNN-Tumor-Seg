@@ -121,13 +121,18 @@ The run_pipeline script is intended to demonstrate the flow of training a comple
 For all of these bash scripts you will of course have to adjust the filepaths. Please also note that prior to running any of these scripts the data must first be preprocessed (see below) and a GNN must be trained prior to training a CNN.
 
 ## Using the Docker Image
+
 1. Load the image: 
+
     docker load -i gnn_seg_brats21_docker.tar.gz
+
 2. Run the image: 
+    
     docker run -it --rm -v "\<path to input folder\>":"/input" -v "\<path to output folder\>":"/output" -e DGLBACKEND=pytorch gnn_seg:cpu_build
 The docker image contains the weights of a fully trained model and uses these to make the predictions.
 
 The BraTS challenge, and therefore the Docker image, require a particular input format. Notably, the image is NOT run on the entire dataset. Instead, it is run on each MRI individually. As such, the input directory should conform to the following:
+
 input/
 
    BraTS2021_xxxxx_flair.nii.gz
@@ -139,6 +144,7 @@ input/
    BraTS2021_xxxxx_t2.nii.gz
 
 The output will then be produced as:
+
 output/
 
    xxxxx.nii.gz
@@ -146,6 +152,7 @@ output/
 In order to segment multiple MRIs sequentially, we recommend either 1) using the generate_joint_predictions.py script or 2) writing a script to run the "docker run" command as many times as needed while changing the input folder argument.
 
 Furthermore, during initial development, we assumed that all provided images would have the same orientation as the BraTS training data:
+
 [ -1.0,  -0.0,  -0.0,  -0.0],
 
 [ -0.0,  -1.0,  -0.0, 239.0],
@@ -153,6 +160,7 @@ Furthermore, during initial development, we assumed that all provided images wou
 [  0.0,   0.0,   1.0,   0.0],
 
 [  0.0,   0.0,   0.0,   1.0],
+
 MRIs with a different orientation will likely fail or be segmented incorrectly.
 
 ## Data Access
