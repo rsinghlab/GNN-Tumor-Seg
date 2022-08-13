@@ -1,5 +1,5 @@
 # GNN-Tumor-Seg
-This repository accompanies the publication A Joint Graph and Image Convolution Network for Automatic Brain Tumor Segmentation([LCNS](https://doi.org/10.1007/978-3-031-08999-2_30), [Arxiv](https://arxiv.org/abs/2109.05580)). It contains the source code for the experiments described in the paper as well as the Docker model submitted to the BraTS2021 competition as a package.
+This repository accompanies the publication A Joint Graph and Image Convolution Network for Automatic Brain Tumor Segmentation([LNCS](https://doi.org/10.1007/978-3-031-08999-2_30), [Arxiv](https://arxiv.org/abs/2109.05580)). It contains the source code for the experiments described in the paper as well as the Docker model submitted to the BraTS2021 competition as a package.
 
 
 ## Requirements
