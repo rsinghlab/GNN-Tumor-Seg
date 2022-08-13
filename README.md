@@ -180,11 +180,13 @@ Please cite the following if you use the code or model from this repository:
 
 Saueressig, C., Berkley, A., Munbodh, R., Singh, R. (2022). A Joint Graph and Image Convolution Network for Automatic Brain Tumor Segmentation. In: Crimi, A., Bakas, S. (eds) Brainlesion: Glioma, Multiple Sclerosis, Stroke and Traumatic Brain Injuries. BrainLes 2021. Lecture Notes in Computer Science, vol 12962. Springer, Cham. https://doi.org/10.1007/978-3-031-08999-2_30
 
+```
 @inproceedings{saueressig2022joint,
   title={A Joint Graph and Image Convolution Network for Automatic Brain Tumor Segmentation},
-  author={Saueressig, Camillo and Berkley, Adam and Reshma, Munbodh and Singh, Ritambhara},
-  booktitle={Brainlesion: Glioma, Multiple Sclerosis, Stroke and Traumatic Brain Injuries},
-  pages={TODO},
+  author={Saueressig, Camillo and Berkley, Adam and Munbodh, Reshma and Singh, Ritambhara},
+  booktitle={International MICCAI Brainlesion Workshop},
+  pages={356--365},
   year={2022},
   organization={Springer}
 }
+```
