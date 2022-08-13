@@ -1,5 +1,5 @@
 # GNN-Tumor-Seg
-This repository accompanies the publication ["A Joint Graph and Image Convolution Network for Automatic Brain Tumor Segmentation"](https://doi.org/10.1007/978-3-031-08999-2_30). It contains the source code for the experiments described in the paper as well as the Docker model submitted to the BraTS2021 competition.
+This repository accompanies the publication A Joint Graph and Image Convolution Network for Automatic Brain Tumor Segmentation"(["Offical"](https://doi.org/10.1007/978-3-031-08999-2_30), ["Arxiv"](https://arxiv.org/abs/2109.05580)). It contains the source code for the experiments described in the paper as well as the Docker model submitted to the BraTS2021 competition as a package.
 
 
 ## Requirements
@@ -40,7 +40,7 @@ The converted data is then stored in a separate directory, which is used as inpu
 
 Example: 
 
-    "python -m scripts.preprocess_dataset -d ~/project_data/BraTS21_data/raw/train -n 15000 -k 0 -b 0.5 -o ~/project_data/BraTS21_data/processed/train -l _seg.nii.gz -p BraTS2021"
+    python -m scripts.preprocess_dataset -d ~/project_data/BraTS21_data/raw/train -n 15000 -k 0 -b 0.5 -o ~/project_data/BraTS21_data/processed/train -l _seg.nii.gz -p BraTS2021
 
 The CLI arguments are explained in the script.
 
@@ -70,6 +70,7 @@ While the trained GNN can produce reliable predictions on its own, the identific
 
 ### Training CNN to Refine GNN Predictions
 Entrypoint: scripts.train_refinement_cnn.py
+
 Example: See scripts.train_cnn_randomized_hyperparameters.sh
 
 Reads in the logits produced by the previous step and trains a CNN to improve the predictions. The CNN relies on the GNN to identify the gross tumor, and then only refines that particular segment of the predictions. This greatly speeds up CNN memory requirements and therefore training because the input size is much smaller. However, if the GNN misses part of the tumor entirely, the CNN cannot improve that part of the predictions.
@@ -125,13 +126,17 @@ For all of these bash scripts you will of course have to adjust the filepaths. P
 
 ## Using the Docker Image
 
-1. Load the image: 
+1. Pull the image: 
 
-    docker load -i gnn_seg_brats21_docker.tar.gz
+        docker pull ghcr.io/rsinghlab/gnn_seg:cpu_build
 
-2. Run the image: 
+2. Check to see if image is now available locally using:
+
+        docker images
+
+3. Run the image: 
     
-    docker run -it --rm -v "\<path to input folder\>":"/input" -v "\<path to output folder\>":"/output" -e DGLBACKEND=pytorch gnn_seg:cpu_build
+        docker run -it --rm -v "\<path to input folder\>":"/input" -v "\<path to output folder\>":"/output" -e DGLBACKEND=pytorch ghcr.io/rsinghlab/gnn_seg:cpu_build
 
 The docker image contains the weights of a fully trained model and uses these to make the predictions.
 
